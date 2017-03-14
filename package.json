@@ -1,0 +1,35 @@
+{
+  "name": "MotionProfile",
+  "description": "JS service to build data representation of a motion profile. http://motionanalyzer.rockwellautomation.com",
+  "keywords": [
+    "Motion Analyzer",
+    "MotionAnalyzer"
+  ],
+  "version": "0.5.0",
+  "author": "Tom Tichy <ttichy@yahoo.com>",
+  "contributors: Brian Gambrell <bgambre@ra.rockwell.com>"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttichy/MotionProfile.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ttichy/MotionProfile/issues"
+  },
+  "dependencies": {
+    "undo-manager": ">=1.0.5"
+  },
+  "devDependencies": {
+    "undo-manager": ">=1.0.5"
+  },
+  "config": {
+    "native": false
+  },
+  "main": "./index.js",
+  "directories": {
+    "lib": "./lib/"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "Apache License 2.0"
+}
