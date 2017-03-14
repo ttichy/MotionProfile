@@ -1,6 +1,6 @@
 describe('Unit: profile serialization testing', function() {
 
-    var motionProfileFactory = require('../../profile/motionProfile');
+    var motionProfileFactory = require('../../lib/profile/motionProfile');
 
     it('should be able to serialize and deserialize profile with only AccelSegments', function() {
 

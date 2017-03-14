@@ -1,23 +1,9 @@
 describe('Unit: motionProfileFactory performance testing', function() {
 
-    var motionProfileFactory = require('../../profile/motionProfile');
-    var accelSegmentFactory = require('../../segments/accelSegment');
-    var fastMath = require('../../util/fastMath');
-    var ph = require('../../profile/profileHelper');
-
-    beforeEach(function() {
-        module('myApp');
-
-        inject(function(_motionProfileFactory_, _AccelSegment_, _FastMath_) {
-            motionProfileFactory = _motionProfileFactory_;
-            accelSegmentFactory = _AccelSegment_;
-            fastMath = _FastMath_;
-        });
-
-        inject(function(_ProfileHelper_) {
-            ph = _ProfileHelper_;
-        });
-    });
+    var motionProfileFactory = require('../../lib/profile/motionProfile');
+    var accelSegmentFactory = require('../../lib/segments/accelSegment');
+    var fastMath = require('../../lib/util/fastMath');
+    var ph = require('../../lib/profile/profileHelper');
 
 
     var TOTAL = 20000;

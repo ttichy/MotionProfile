@@ -1,6 +1,6 @@
 describe('Unit: basicSegmentFactory motion testing', function() {
 
-  var basicSegmentFactory = require('../../segmments/basicSegment');
+  var basicSegmentFactory = require('../../lib/segmments/basicSegment');
 
 
   it('should create a basic segment [0,0], [1,1] and correctly evalute position and velocities', function() {

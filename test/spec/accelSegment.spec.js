@@ -1,6 +1,6 @@
 describe('Unit: accelSegmentFactory testing', function() {
 
-    var accelSegmentFactory = require('../../segments/accelSegment');
+    var accelSegmentFactory = require('../../lib/segments/accelSegment');
 
 
 

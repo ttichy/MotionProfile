@@ -1,7 +1,7 @@
 describe('Unit: basicSegmentFactory load testing', function() {
 
-  var basicSegmentFactory = require('../../segments/basicSegment');
-  var accelSegmentFactory = require('../../segments/accelSegment');
+  var basicSegmentFactory = require('../../lib/segments/basicSegment');
+  var accelSegmentFactory = require('../../lib/segments/accelSegment');
 
 
   it('should directly create a basic segment [1,1], [2,2] with loads', function() {

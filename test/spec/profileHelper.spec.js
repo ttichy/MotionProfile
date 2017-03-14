@@ -1,9 +1,9 @@
 describe('Unit: profile helper functions-', function() {
-  var polynomialFactory = require('../../util/polynomial');
-  var basicSegmentFactory = require('../../segments/basicSegment');
-  var accelSegmentFactory = require('../../segments/accelSegment');
-  var ph = require('../../segments/profileHelper');
-  var motionProfileFactory = require('../../profile/motionProfile');
+  var polynomialFactory = require('../../lib/util/polynomial');
+  var basicSegmentFactory = require('../../lib/segments/basicSegment');
+  var accelSegmentFactory = require('../../lib/segments/accelSegment');
+  var ph = require('../../lib/segments/profileHelper');
+  var motionProfileFactory = require('../../lib/profile/motionProfile');
 
 
 

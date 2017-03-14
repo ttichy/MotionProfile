@@ -1,7 +1,7 @@
 describe('Polynomial unit test', function() {
-  var fm = require('../../util/fastMath');
+  var fm = require('../../lib/util/fastMath');
 
-  var polynomialFactory = require('../../util/polynomial');
+  var polynomialFactory = require('../../lib/util/polynomial');
 
 
   beforeEach(function() {
