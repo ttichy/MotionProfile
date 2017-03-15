@@ -5,7 +5,7 @@
     "Motion Analyzer",
     "MotionAnalyzer"
   ],
-  "version": "0.5.0",
+  "version": "1.0.0",
   "author": "Tom Tichy <ttichy@yahoo.com>",
   "contributors": "Brian Gambrell <bgambre@ra.rockwell.com>",
   "repository": {
@@ -33,7 +33,7 @@
     "lib": "./lib/"
   },
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start karma.conf.js"
+    "test": "karma start ./karma.conf.js --single-run"
   },
   "license": "Apache License 2.0"
 }

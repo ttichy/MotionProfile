@@ -1,1 +1,1 @@
-module.exports = require('./lib/MotionProfile.js');
+module.exports = require('./lib/profile/motionProfile.js');
