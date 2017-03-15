@@ -1,4 +1,4 @@
-var linkedList = require('../../lib/util/linkedList');
+var linkedList = require('../lib/util/linkedList');
 
 describe("Linked list unit tests", function() {
   it("Should add 2 nodes successfully", function() {
