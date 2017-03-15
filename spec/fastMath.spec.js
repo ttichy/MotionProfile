@@ -2,7 +2,7 @@ describe('myApp.version module', function() {
 
 
 
-  var fm = require('../../lib/util/fastMath');
+  var fm = require('../lib/util/fastMath');
 
 
 

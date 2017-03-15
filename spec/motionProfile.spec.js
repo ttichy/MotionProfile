@@ -1,6 +1,6 @@
 describe('Unit: profile serialization testing', function() {
 
-    var motionProfileFactory = require('../../lib/profile/motionProfile');
+    var motionProfileFactory = require('../lib/profile/motionProfile');
 
     it('should be able to serialize and deserialize profile with only AccelSegments', function() {
 
@@ -87,7 +87,7 @@ describe('Unit: profile serialization testing', function() {
 
         profile.addLoadSegment(loadSeg1);
 
-        var newProfile = motionProfileFactory.serializeProfile();
+        var newProfile = motionProfileFactory.serializeProfile(profile);
 
 
     });
@@ -98,23 +98,13 @@ describe('Unit: profile serialization testing', function() {
 
 describe('Unit: motionProfileFactory testing', function() {
 
-    var motionProfileFactory;
-    var accelSegmentFactory, indexSegmentFactory, fastMath, ph;
+    var motionProfileFactory = require('../lib/profile/motionProfile');
+    var accelSegmentFactory=require('../lib/segments/accelSegment');
+    var indexSegmentFactory=require('../lib/segments/indexSegment');
+    var fastMath=require('../lib/util/fastMath');
+    var ph=require('../lib/profile/profileHelper');
 
-    beforeEach(function() {
-        module('myApp');
 
-        inject(function(_motionProfileFactory_, _AccelSegment_, _IndexSegment_, _FastMath_) {
-            motionProfileFactory = _motionProfileFactory_;
-            accelSegmentFactory = _AccelSegment_;
-            indexSegmentFactory = _IndexSegment_;
-            fastMath = _FastMath_;
-        });
-
-        inject(function(_ProfileHelper_) {
-            ph = _ProfileHelper_;
-        });
-    });
 
     it('should create an empty rotary profile', function() {
 

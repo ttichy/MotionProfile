@@ -1,9 +1,9 @@
 describe('Unit: motionProfileFactory performance testing', function() {
 
-    var motionProfileFactory = require('../../lib/profile/motionProfile');
-    var accelSegmentFactory = require('../../lib/segments/accelSegment');
-    var fastMath = require('../../lib/util/fastMath');
-    var ph = require('../../lib/profile/profileHelper');
+    var motionProfileFactory = require('../lib/profile/motionProfile');
+    var accelSegmentFactory = require('../lib/segments/accelSegment');
+    var fastMath = require('../lib/util/fastMath');
+    var ph = require('../lib/profile/profileHelper');
 
 
     var TOTAL = 20000;

@@ -1,22 +1,7 @@
 describe('Polynomial unit test', function() {
   var fm = require('../lib/util/fastMath');
 
-  var polynomialFactory = require('../../lib/util/polynomial');
-
-
-  beforeEach(function() {
-    module('myApp');
-
-
-    inject(function(_Polynomial_) {
-      polynomialFactory = _Polynomial_;
-    });
-
-    inject(function(_FastMath_) {
-      fm = _FastMath_;
-    });
-
-  });
+  var polynomialFactory = require('../lib/util/polynomial');
 
 
   it('should create polynomial starting at 0 and evaluate it correctly', function() {

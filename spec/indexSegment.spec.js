@@ -1,6 +1,6 @@
 describe('Unit: indexSegmentFactory testing', function() {
 
-    var indexSegmentFactory = require('../../lib/segments/indexSegment');
+    var indexSegmentFactory = require('../lib/segments/indexSegment');
 
     it('should create an index segment (t0=1, dt=1(tf=2), p0=0.25, dp=1 (pf = 1.25), v=0.5, velLimPos=null, velLimNeg=null, accJerkPct=0.4, decJerkPct=0.6, xSkew=-0.5, ySkew=0.3, shape=trapezoid, mode=incremental) and correctly evalute position and velocities', function() {
 

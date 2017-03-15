@@ -1,7 +1,7 @@
 describe('Unit: loadSegment testing', function() {
 
-  var loadSegmentFactory = require('../../lib/segments/loadSegment');
-  var motionProfileFactory = require('../../lib/profile/motionProfile');
+  var loadSegmentFactory = require('../lib/segments/loadSegment');
+  var motionProfileFactory = require('../lib/profile/motionProfile');
 
 
 
