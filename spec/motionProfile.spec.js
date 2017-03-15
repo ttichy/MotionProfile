@@ -3,7 +3,6 @@ describe('Unit: profile serialization testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
 
     it('should be able to serialize and deserialize profile with only AccelSegments', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         profile.setInitialConditions(1, 2);
@@ -33,7 +32,6 @@ describe('Unit: profile serialization testing', function() {
         profile.appendSegment(seg1);
         profile.appendSegment(seg2);
 
-
         // serialize
         var json = motionProfileFactory.serializeProfile(profile);
 
@@ -43,14 +41,11 @@ describe('Unit: profile serialization testing', function() {
         expect(profileObj.initialPosition).toBe(1);
         expect(profileObj.initialVelocity).toBe(2);
 
-
         var newProfile = motionProfileFactory.deserializeProfile(json);
 
         expect(newProfile.getAllSegments()[1].EvaluatePositionAt(5)).toBe(profile.getAllSegments()[1].EvaluatePositionAt(5));
-
-
-
     });
+
     it('should be able to serialize and deserialize profile with only AccelSegments and load segments', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -88,29 +83,21 @@ describe('Unit: profile serialization testing', function() {
         profile.addLoadSegment(loadSeg1);
 
         var newProfile = motionProfileFactory.serializeProfile(profile);
-
-
     });
-
-
 });
 
 
 describe('Unit: motionProfileFactory testing', function() {
-
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory=require('../lib/segments/accelSegment');
     var indexSegmentFactory=require('../lib/segments/indexSegment');
     var fastMath=require('../lib/util/fastMath');
     var ph=require('../lib/profile/profileHelper');
 
-
-
     it('should create an empty rotary profile', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        expect(profile.ProfileType).toBe('rotary');
+        expect(profile.type).toBe('rotary');
         expect(profile.getAllBasicSegments.length).toBe(0);
     });
 
@@ -118,7 +105,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var profile = motionProfileFactory.createMotionProfile("linear");
 
-        expect(profile.ProfileType).toBe('linear');
+        expect(profile.type).toBe('linear');
         expect(profile.getAllBasicSegments.length).toBe(0);
     });
 
@@ -147,8 +134,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
-
-
     });
 
     it('should correctly delete an accel segment that is NOT the last segment', function() {
@@ -222,7 +207,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should correctly find existing segments with exact matches', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -238,11 +222,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         existing = profile.getExistingSegment(2);
         expect(existing.initialTime).toBe(2);
-
     });
 
     it('should not find any segments before and after the existing profile segment range', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -261,7 +243,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should find existing segments, even if initialTime is off by some number less than epsilon', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -281,7 +262,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should insert a segment in between two other segments', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -303,11 +283,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
-
     });
 
     it('should insert a segment before an existing first segment', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -328,7 +306,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to find parent segment via its child segment id", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
@@ -354,7 +331,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('appending a segment should match final conditions of the previous segment ', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 5, 0.5);
@@ -372,7 +348,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to find parent segment via its child segment id", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
@@ -388,8 +363,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(seg1);
 
-
-
         var allSegments = profile.getAllBasicSegments();
 
         var childSegment = allSegments[1];
@@ -397,16 +370,11 @@ describe('Unit: motionProfileFactory testing', function() {
         var parent = profile.findParentSegmentByChildId(childSegment.id);
 
         expect(parent).toBe(seg1);
-
-
-
     });
 
 
     it('it should append incremental segment after absolute segment and correctly evalute final values ', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
-
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 5, 0.5, "absolute");
 
         profile.appendSegment(accelSegment1);
@@ -415,18 +383,14 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(accelSegment2);
 
-
         var allBasicSegments = profile.getAllSegments();
 
         //also, the profile needs to be valid
         expect(allBasicSegments[1].finalTime).toBe(4);
-
-
     });
+
     it("should be able to create segments via motionProfile accel segment function", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
-
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
             t0: 0,
             tf: 2,
@@ -455,7 +419,6 @@ describe('Unit: motionProfileFactory testing', function() {
             pf: 5,
             jPct: 0.5,
             mode: "incremental"
-
         });
 
         profile.appendSegment(seg1);
@@ -523,7 +486,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to modify final time, final position and jerk for AccelSegmentTimeDistance segment ", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
