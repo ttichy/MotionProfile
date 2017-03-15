@@ -87,8 +87,24 @@ describe('Unit: profile serialization testing', function() {
 
         profile.addLoadSegment(loadSeg1);
 
-        var newProfile = motionProfileFactory.serializeProfile(profile);
+        var json = motionProfileFactory.serializeProfile(profile);
 
+        var profileObj = JSON.parse(json)
+
+        expect(profileObj.loadSegments.length).toBe(1);
+        expect(profileObj.segments.length).toBe(2);
+
+
+        var newProfile = motionProfileFactory.deserializeProfile(json);
+
+        var allSegments=newProfile.getAllSegments();
+
+        expect(allSegments.length).toBe(2);
+        expect(newProfile.getAllSegments()[0].EvaluatePositionAt(1.1)).toBe(profile.getAllSegments()[0].EvaluatePositionAt(1.1));
+
+        var loadSegments=profile.getAllLoadSegments();
+        expect(loadSegments.length).toBe(1);
+        expect(loadSegments[0].evaluateLoadAt(1)).toBe(loadSeg1.evaluateLoadAt(1));
 
     });
 
