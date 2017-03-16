@@ -17,7 +17,7 @@ describe('Polynomial unit test', function() {
 
   });
 
-  it('should create polynomial starting at 1 and evaluate it correctly', function() {
+  it('should create polynomial starting at 1 and evaluate it corr-ectly', function() {
     var poly = polynomialFactory.createPolyAbCd([1, 2, 3, 4], 1, 20);
 
     var result0 = poly.evaluateAt(1);

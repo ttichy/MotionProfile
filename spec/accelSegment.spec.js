@@ -432,7 +432,7 @@ describe('Unit: accelSegmentFactory testing', function() {
 
 
         var newSeg = seg.importFromData(obj);
-        expect(seg.EvaluatePositionAt(0.56)).toBeCloseTo(newSeg.EvaluatePositionAt(0.56), 4);
+        expect(seg.evaluatePositionAt(0.56)).toBeCloseTo(newSeg.evaluatePositionAt(0.56), 4);
 
     });
 
