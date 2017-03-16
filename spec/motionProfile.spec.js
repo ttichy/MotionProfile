@@ -41,7 +41,7 @@ describe('Unit: profile serialization testing', function() {
 
         var newProfile = motionProfileFactory.deserialize(json);
 
-        expect(newProfile.getAllSegments()[1].EvaluatePositionAt(5)).toBe(profile.getAllSegments()[1].EvaluatePositionAt(5));
+        expect(newProfile.getAllSegments()[1].evaluatePositionAt(5)).toBe(profile.getAllSegments()[1].evaluatePositionAt(5));
     });
 
     it('should be able to serialize and deserialize profile with only AccelSegments and load segments', function() {
@@ -82,57 +82,60 @@ describe('Unit: profile serialization testing', function() {
         var newProfile = motionProfileFactory.serialize(profile);
     });
 
-    it('should be able to serialize and deserialize profile with only index segments', function () {
-        var profile = motionProfileFactory.createMotionProfile("linear");
+    it('should be able to serialize and deserialize profile with only AccelSegments and load segments', function() {
 
-        var indexSeg1 = profile.appendSegment(
-            motionProfileFactory.createIndexSegment({
-                //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
-                t0: 0,
-                tf: 1.25,
-                p0: 0,
-                pf: 2,
-                v: 12.5,
-                velLimPos: null,
-                velLimNeg: null,
-                accJerk: 0.2,
-                decJerk: 1,
-                xSkew: null,
-                ySkew: null,
-                shape: 'trapezoid',
-                mode: 'absolute'
-        }));
+        var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        expect(indexSeg1.initialTime).toBe(0);
-        expect(indexSeg1.finalTime).toBe(1.25);
-        expect(indexSeg1.EvaluateVelocityAt(0)).toBeCloseTo(12.5, 4);
-        expect(indexSeg1.EvaluateVelocityAt(1.25)).toBeCloseTo(12.5, 4);
+        profile.setInitialConditions(1, 2);
 
-        var indexSeg2 = profile.appendSegment(
-            motionProfileFactory.createIndexSegment({
-                t0: 0,
-                tf: 1.25,
-                p0: 0,
-                pf: 2,
-                v: indexSeg1.EvaluateVelocityAt(indexSeg1.finalTime),
-                velLimPos: null,
-                velLimNeg: null,
-                accJerk: 0.2,
-                decJerk: 1,
-                xSkew: null,
-                ySkew: null,
-                shape: 'trapezoid',
-                mode: 'incremental'
-        }));
+        var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0,
+            vf: 5,
+            jPct: 0.5,
+            mode: "incremental"
 
-        // type, t0, tf, initialLoad, finalLoad
-        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
+        });
+
+        var seg2 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 2,
+            tf: 5,
+            p0: 0,
+            v0: 0,
+            vf: 0,
+            jPct: 0.5,
+            mode: "incremental"
+
+        });
+
+        profile.appendSegment(seg1);
+        profile.appendSegment(seg2);
+
+
+        var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+
         profile.addLoadSegment(loadSeg1);
 
-        var profileJSON = motionProfileFactory.serialize(profile);
-        console.log(profileJSON);
-        var reconstructedProfile = motionProfileFactory.deserialize(profileJSON);
+        var json = motionProfileFactory.serialize(profile);
 
+        var profileObj = JSON.parse(json)
+
+        expect(profileObj.loadSegments.length).toBe(1);
+        expect(profileObj.segments.length).toBe(2);
+
+
+        var newProfile = motionProfileFactory.deserialize(json);
+
+        var allSegments=newProfile.getAllSegments();
+
+        expect(allSegments.length).toBe(2);
+        expect(newProfile.getAllSegments()[0].evaluatePositionAt(1.1)).toBe(profile.getAllSegments()[0].evaluatePositionAt(1.1));
+
+        var loadSegments=profile.getAllLoadSegments();
+        expect(loadSegments.length).toBe(1);
+        expect(loadSegments[0].evaluateLoadAt(1)).toBe(loadSeg1.evaluateLoadAt(1));
 
     });
 });
@@ -181,7 +184,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var seg0 = segments[0];
         expect(seg0.initialTime).toBe(0);
         expect(seg0.finalTime).toBe(2);
-        expect(seg0.EvaluatePositionAt(0.5)).toBeCloseTo(0.277777, 4);
+        expect(seg0.evaluatePositionAt(0.5)).toBeCloseTo(0.277777, 4);
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
@@ -216,7 +219,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var seg0 = segments[0];
         expect(seg0.initialTime).toBe(0);
         expect(seg0.finalTime).toBe(2);
-        expect(seg0.EvaluatePositionAt(0.5)).toBeCloseTo(0.277777, 4);
+        expect(seg0.evaluatePositionAt(0.5)).toBeCloseTo(0.277777, 4);
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
@@ -251,7 +254,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var seg0 = segments[0];
         expect(seg0.initialTime).toBe(0);
         expect(seg0.finalTime).toBe(1);
-        expect(seg0.EvaluatePositionAt(0.5)).toBeCloseTo(0.72916, 4);
+        expect(seg0.evaluatePositionAt(0.5)).toBeCloseTo(0.72916, 4);
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
@@ -933,10 +936,10 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(indexSeg);
 
         var firstIndexSeg = profile.getAllSegments()[0];
-        expect(firstIndexSeg.EvaluatePositionAt(0.47988481)).toBeCloseTo(0.0501486, 4);
-        expect(firstIndexSeg.EvaluateVelocityAt(0.6)).toBeCloseTo(0.184729, 4);
+        expect(firstIndexSeg.evaluatePositionAt(0.47988481)).toBeCloseTo(0.0501486, 4);
+        expect(firstIndexSeg.evaluateVelocityAt(0.6)).toBeCloseTo(0.184729, 4);
         expect(firstIndexSeg.getAllSegments()[4].evaluateVelocityAt(0.992956)).toBeCloseTo(0.1307183, 4);
-        expect(firstIndexSeg.EvaluateVelocityAt(0.992956)).toBeCloseTo(0.1307183, 4);
+        expect(firstIndexSeg.evaluateVelocityAt(0.992956)).toBeCloseTo(0.1307183, 4);
 
         expect(profile.getAllSegments().length).toBe(1);
         var accSeg = accelSegmentFactory.MakeFromTimeDistance(0, 1.57, 0, 0, 0.526, 0.4, 'incremental');
@@ -950,8 +953,8 @@ describe('Unit: motionProfileFactory testing', function() {
         allSegs = profile.getAllSegments();
 
         expect(profile.segments.countSegments()).toBe(2);
-        expect(allSegs[0].EvaluateVelocityAt(0.8)).toBeCloseTo(0.3430342, 4);
-        expect(allSegs[1].EvaluateVelocityAt(2.206)).toBeCloseTo(-0.15030278, 4);
+        expect(allSegs[0].evaluateVelocityAt(0.8)).toBeCloseTo(0.3430342, 4);
+        expect(allSegs[1].evaluateVelocityAt(2.206)).toBeCloseTo(-0.15030278, 4);
     });
 
     it('insert index segment between two accel segments (incremental and absolute)', function() {
@@ -968,41 +971,41 @@ describe('Unit: motionProfileFactory testing', function() {
                 'incremental'));
 
         // run tests on accSeg 1
-        expect(accSeg1.EvaluatePositionAt(0.74)).toBeCloseTo(20.6589, 4);
-        expect(accSeg1.EvaluatePositionAt(accSeg1.finalTime)).toBe(38.5);
-        expect(accSeg1.EvaluatePositionAt(1)).toBe(38.5);
-        expect(accSeg1.EvaluatePositionAt(0.6)).toBeCloseTo(13.3193617, 4);
+        expect(accSeg1.evaluatePositionAt(0.74)).toBeCloseTo(20.6589, 4);
+        expect(accSeg1.evaluatePositionAt(accSeg1.finalTime)).toBe(38.5);
+        expect(accSeg1.evaluatePositionAt(1)).toBe(38.5);
+        expect(accSeg1.evaluatePositionAt(0.6)).toBeCloseTo(13.3193617, 4);
 
         // (t0, tf, p0, v0, pf, jPct, mode, loads)
         var accSeg2 = profile.appendSegment(
             accelSegmentFactory.MakeFromTimeDistance(
                 accSeg1.finalTime, // t0
                 13, // tf
-                accSeg1.EvaluatePositionAt(accSeg1.finalTime), // p0
-                accSeg1.EvaluateVelocityAt(accSeg1.finalTime), // v0
+                accSeg1.evaluatePositionAt(accSeg1.finalTime), // p0
+                accSeg1.evaluateVelocityAt(accSeg1.finalTime), // v0
                 58.5, // pf
                 0.5, // jPct
                 'absolute')); // mode
 
         // rerun exact same tests on accSeg1
-        expect(accSeg1.EvaluatePositionAt(0.74)).toBeCloseTo(20.6589, 4);
-        expect(accSeg1.EvaluatePositionAt(accSeg1.finalTime)).toBe(38.5);
-        expect(accSeg1.EvaluatePositionAt(1)).toBe(38.5);
-        expect(accSeg1.EvaluatePositionAt(0.6)).toBeCloseTo(13.3193617, 4);
+        expect(accSeg1.evaluatePositionAt(0.74)).toBeCloseTo(20.6589, 4);
+        expect(accSeg1.evaluatePositionAt(accSeg1.finalTime)).toBe(38.5);
+        expect(accSeg1.evaluatePositionAt(1)).toBe(38.5);
+        expect(accSeg1.evaluatePositionAt(0.6)).toBeCloseTo(13.3193617, 4);
 
         // run tests on accSeg2
         expect(accSeg2.finalTime).toBe(13);
-        expect(accSeg2.EvaluatePositionAt(accSeg2.finalTime)).toBeCloseTo(58.5, 4);
-        expect(accSeg2.EvaluatePositionAt(7.0995575)).toBeCloseTo(324.80518657, 4);
+        expect(accSeg2.evaluatePositionAt(accSeg2.finalTime)).toBeCloseTo(58.5, 4);
+        expect(accSeg2.evaluatePositionAt(7.0995575)).toBeCloseTo(324.80518657, 4);
 
         // (t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode)
         var indexSeg1 = profile.insertSegment(
             indexSegmentFactory.Make(
                 accSeg1.finalTime, // t0
                 accSeg1.finalTime + 1.67, // tf
-                accSeg1.EvaluatePositionAt(accSeg1.finalTime), // p0
-                accSeg1.EvaluatePositionAt(accSeg1.finalTime) + 12, // pf
-                accSeg1.EvaluateVelocityAt(accSeg1.finalTime), // v
+                accSeg1.evaluatePositionAt(accSeg1.finalTime), // p0
+                accSeg1.evaluatePositionAt(accSeg1.finalTime) + 12, // pf
+                accSeg1.evaluateVelocityAt(accSeg1.finalTime), // v
                 null, // velLimPos
                 null, // velLimNeg
                 0.1, // accJerk
@@ -1023,35 +1026,41 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(indexSeg1B.finalTime).toBe(2.67);
 
         // index seg start, end, and middle position
-        expect(indexSeg1B.EvaluatePositionAt(1)).toBe(38.5);
-        expect(indexSeg1B.EvaluatePositionAt(1.5)).toBeCloseTo(53.12942, 4);
-        expect(indexSeg1B.EvaluatePositionAt(2.67)).toBeCloseTo(50.5, 4);
+        expect(indexSeg1B.evaluatePositionAt(1)).toBe(38.5);
+        expect(indexSeg1B.evaluatePositionAt(1.5)).toBeCloseTo(53.12942, 4);
+        expect(indexSeg1B.evaluatePositionAt(2.67)).toBeCloseTo(50.5, 4);
 
         // index seg start, middle, and end velocity
-        expect(indexSeg1B.EvaluateVelocityAt(1)).toBeCloseTo(77, 10);
-        expect(indexSeg1B.EvaluateVelocityAt(1.5)).toBeCloseTo(-11.66425, 4);
-        expect(indexSeg1B.EvaluateVelocityAt(2.67)).toBeCloseTo(77, 10);
+        expect(indexSeg1B.evaluateVelocityAt(1)).toBeCloseTo(77, 10);
+        expect(indexSeg1B.evaluateVelocityAt(1.5)).toBeCloseTo(-11.66425, 4);
+        expect(indexSeg1B.evaluateVelocityAt(2.67)).toBeCloseTo(77, 10);
 
         // index seg early, middle, and late acceleration
-        expect(indexSeg1B.EvaluateAccelerationAt(1.2)).toBeCloseTo(-202.211, 3);
-        expect(indexSeg1B.EvaluateAccelerationAt(1.85)).toBe(0);
-        expect(indexSeg1B.EvaluateAccelerationAt(2.55)).toBeCloseTo(475.678, 3);
+        expect(indexSeg1B.evaluateAccelerationAt(1.2)).toBeCloseTo(-202.211, 3);
+        expect(indexSeg1B.evaluateAccelerationAt(1.85)).toBe(0);
+        expect(indexSeg1B.evaluateAccelerationAt(2.55)).toBeCloseTo(475.678, 3);
 
         // accSeg2 intial and final time
         expect(accSeg2B.initialTime).toBe(2.67);
         expect(accSeg2B.finalTime).toBe(13);
 
         // accSeg2 start, middle, and end position
-        expect(accSeg2B.EvaluatePositionAt(2.67)).toBeCloseTo(50.5, 4);
-        expect(accSeg2B.EvaluatePositionAt(8.001514035)).toBeCloseTo(294.953658, 4);
-        expect(accSeg2B.EvaluatePositionAt(13)).toBeCloseTo(58.5, 4); // this value is wrong
+        expect(accSeg2B.evaluatePositionAt(2.67)).toBeCloseTo(50.5, 4);
+        expect(accSeg2B.evaluatePositionAt(8.001514035)).toBeCloseTo(294.953658, 4);
+        expect(accSeg2B.evaluatePositionAt(13)).toBeCloseTo(58.5, 4); // this value is wrong
 
         // accSeg2 start and end velocity
-        expect(accSeg2B.EvaluateVelocityAt(2.67)).toBeCloseTo(77, 10);
-        expect(accSeg2B.EvaluateVelocityAt(8)).toBeCloseTo(-2.4723373, 4);
-        expect(accSeg2B.EvaluateVelocityAt(13)).toBeCloseTo(-75.4511, 4); // this value is wrong
+        expect(accSeg2B.evaluateVelocityAt(2.67)).toBeCloseTo(77, 10);
+        expect(accSeg2B.evaluateVelocityAt(8)).toBeCloseTo(-2.4723373, 4);
+        expect(accSeg2B.evaluateVelocityAt(13)).toBeCloseTo(-75.4511, 4); // this value is wrong
 
-        expect(accSeg2B.EvaluateAccelerationAt(8)).toBeCloseTo(-19.6775, 4);
+        expect(accSeg2B.evaluateAccelerationAt(8)).toBeCloseTo(-19.6775, 4);
+        // expect(indexSeg.evaluatePositionAt(indexSeg.finalTime)).toBeCloseTo(50.5);
+        // expect(indexSeg.evaluatePositionAt(indexSeg.initialTime)).toBe(38.5);
+        // expect(accSeg2.evaluatePositionAt(accSeg2.initialTime)).toBeCloseTo(50.5, 4);
+        // expect(accSeg2.evaluatePositionAt(accSeg2.finalTime)).toBeCloseTo(124, 4);
+        // expect(accSeg2.evaluatePositionAt(8.8)).toBeCloseTo(274.64365, 4);
+        // expect(accSeg2.evaluateVelocityAt(8.8)).toBeCloseTo(-21.0651, 4);
     });
 
     it('should clear the profile, leaving no segments', function() {
