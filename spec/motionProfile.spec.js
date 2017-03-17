@@ -160,18 +160,6 @@ describe('Unit: profile serialization testing', function() {
                 mode: 'absolute'
         }));
 
-        // indexSeg1.getAllSegments().forEach(function (segment, i) {
-        //     if (i == 5) {
-        //         console.log(segment.initialTime);
-        //         console.log(segment.finalTime);
-        //         console.log(segment.initialVelocity);
-        //         console.log(segment.finalVelocity);
-        //         console.log(segment.evaluateVelocityAt(segment.finalTime));
-        //         console.log(segment.evaluatePositionAt(segment.finalTime));
-        //         console.log(segment.positionPoly);
-        //         console.log(segment.velocityPoly);
-        //     }
-        // });
         expect(indexSeg1.initialTime).toBe(0);
         expect(indexSeg1.finalTime).toBe(1.25);
         expect(profile.evaluateVelocityAt(0)).toBeCloseTo(12.5, 4);
@@ -196,13 +184,13 @@ describe('Unit: profile serialization testing', function() {
         }));
 
         // type, t0, tf, initialLoad, finalLoad
-        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.5);
         profile.addLoadSegment(loadSeg1);
 
-        console.dir(profile.getAllSegments());
+        // console.dir(profile.getAllSegments());
 
         var profileJSON = motionProfileFactory.serialize(profile);
-        console.log(profileJSON);
+        // console.log(profileJSON);
         var reconstructedProfile = motionProfileFactory.deserialize(profileJSON);
 
         expect(reconstructedProfile.type).toBe("linear");
@@ -1161,5 +1149,41 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.getAllSegments().length).toBe(0);
 
     });
+});
 
+
+describe('Unit: Profile Exporting', function () {
+    var motionProfileFactory = require('../lib/profile/motionProfile');
+    var accelSegmentFactory = require('../lib/segments/accelSegment');
+    var indexSegmentFactory = require('../lib/segments/indexSegment');
+    var fastMath = require('../lib/util/fastMath');
+
+    it('Should export basic segments for an index segment', function () {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
+        var indexSeg1 = profile.appendSegment(
+                motionProfileFactory.createIndexSegment({
+                    //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                    t0: 0,
+                    tf: 1.25,
+                    p0: 0,
+                    pf: 2,
+                    v: 12.5,
+                    velLimPos: null,
+                    velLimNeg: null,
+                    accJerk: 0.2,
+                    decJerk: 1,
+                    xSkew: null,
+                    ySkew: null,
+                    shape: 'trapezoid',
+                    mode: 'absolute'
+            }));
+
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.5);
+        profile.addLoadSegment(loadSeg1);
+
+        var pbs = profile.generateBasicSegments();
+        // console.log(pbs);
+        // console.log(JSON.stringify(pbs));
+    });
 });
