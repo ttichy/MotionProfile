@@ -86,9 +86,9 @@ describe("Linear interpolation", function () {
 
 
 
-xdescribe("Full table calculations", function () {
+describe("Full table calculations", function () {
     it('Should have the validated results', function () {
-        var result = camSegment.CalculateCoeffsFromCam([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
+        var result = camSegment.calculateCamCoefficients([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
         // console.log(result);
         expect(result).toEqual(
             [[0,
