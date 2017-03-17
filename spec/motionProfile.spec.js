@@ -196,8 +196,10 @@ describe('Unit: profile serialization testing', function() {
         }));
 
         // type, t0, tf, initialLoad, finalLoad
-        // var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
-        // profile.addLoadSegment(loadSeg1);
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
+        profile.addLoadSegment(loadSeg1);
+
+        console.dir(profile.getAllSegments());
 
         var profileJSON = motionProfileFactory.serialize(profile);
         console.log(profileJSON);
@@ -964,7 +966,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
     });
 
-    xit('should be able to append an index segment to an empty profile, then delete it', function() {
+    it('should be able to append an index segment to an empty profile, then delete it', function() {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
@@ -997,7 +999,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(indexSeg).toBe(sameSeg2);
     });
 
-    xit('should be able to insert an accel segment before an index segment', function() {
+    it('should be able to insert an accel segment before an index segment', function() {
         var profile = motionProfileFactory.createMotionProfile('rotary');
 
         //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode)
@@ -1029,7 +1031,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(allSegs[1].evaluateVelocityAt(2.206)).toBeCloseTo(-0.15030278, 4);
     });
 
-    xit('insert index segment between two accel segments (incremental and absolute)', function() {
+    it('insert index segment between two accel segments (incremental and absolute)', function() {
         var profile = motionProfileFactory.createMotionProfile('linear');
         // (t0, tf, p0, v0, vf, jPct, mode, loads)
         var accSeg1 = profile.appendSegment(
