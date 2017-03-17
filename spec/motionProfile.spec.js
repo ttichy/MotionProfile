@@ -3,6 +3,48 @@ describe('Unit: profile serialization testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
 
     it('should be able to serialize and deserialize profile with only AccelSegments', function() {
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        profile.setInitialConditions(1, 2);
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0,
+            vf: 5,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+        var seg2 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 2,
+            tf: 5,
+            p0: 0,
+            v0: 0,
+            vf: 0,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+        profile.appendSegment(seg1);
+        profile.appendSegment(seg2);
+
+        // serialize
+        var json = motionProfileFactory.serialize(profile);
+
+        var profileObj = JSON.parse(json);
+
+        expect(profileObj.type).toBe("rotary");
+        expect(profileObj.initialPosition).toBe(1);
+        expect(profileObj.initialVelocity).toBe(2);
+
+        var newProfile = motionProfileFactory.deserialize(json);
+
+        expect(newProfile.getAllSegments()[1].evaluatePositionAt(5)).toBe(profile.getAllSegments()[1].evaluatePositionAt(5));
+    });
+
+    it('should be able to serialize and deserialize profile with only AccelSegments and load segments', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -27,30 +69,19 @@ describe('Unit: profile serialization testing', function() {
             vf: 0,
             jPct: 0.5,
             mode: "incremental"
-
         });
 
         profile.appendSegment(seg1);
         profile.appendSegment(seg2);
 
 
-        // serialize
-        var json = motionProfileFactory.serializeProfile(profile);
+        var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
-        var profileObj = JSON.parse(json);
+        profile.addLoadSegment(loadSeg1);
 
-        expect(profileObj.type).toBe("rotary");
-        expect(profileObj.initialPosition).toBe(1);
-        expect(profileObj.initialVelocity).toBe(2);
-
-
-        var newProfile = motionProfileFactory.deserializeProfile(json);
-
-        expect(newProfile.getAllSegments()[1].evaluatePositionAt(5)).toBe(profile.getAllSegments()[1].evaluatePositionAt(5));
-
-
-
+        var newProfile = motionProfileFactory.serialize(profile);
     });
+
     it('should be able to serialize and deserialize profile with only AccelSegments and load segments', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -87,7 +118,7 @@ describe('Unit: profile serialization testing', function() {
 
         profile.addLoadSegment(loadSeg1);
 
-        var json = motionProfileFactory.serializeProfile(profile);
+        var json = motionProfileFactory.serialize(profile);
 
         var profileObj = JSON.parse(json)
 
@@ -95,7 +126,7 @@ describe('Unit: profile serialization testing', function() {
         expect(profileObj.segments.length).toBe(2);
 
 
-        var newProfile = motionProfileFactory.deserializeProfile(json);
+        var newProfile = motionProfileFactory.deserialize(json);
 
         var allSegments=newProfile.getAllSegments();
 
@@ -108,25 +139,93 @@ describe('Unit: profile serialization testing', function() {
 
     });
 
+    it('should be able to serialize and deserialize profile with only index segments', function () {
+        var profile = motionProfileFactory.createMotionProfile("linear");
 
+        var indexSeg1 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                t0: 0,
+                tf: 1.25,
+                p0: 0,
+                pf: 2,
+                v: 12.5,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'absolute'
+        }));
+
+        // indexSeg1.getAllSegments().forEach(function (segment, i) {
+        //     if (i == 5) {
+        //         console.log(segment.initialTime);
+        //         console.log(segment.finalTime);
+        //         console.log(segment.initialVelocity);
+        //         console.log(segment.finalVelocity);
+        //         console.log(segment.evaluateVelocityAt(segment.finalTime));
+        //         console.log(segment.evaluatePositionAt(segment.finalTime));
+        //         console.log(segment.positionPoly);
+        //         console.log(segment.velocityPoly);
+        //     }
+        // });
+        expect(indexSeg1.initialTime).toBe(0);
+        expect(indexSeg1.finalTime).toBe(1.25);
+        expect(profile.evaluateVelocityAt(0)).toBeCloseTo(12.5, 4);
+        expect(profile.evaluateVelocityAt(1.25)).toBeCloseTo(12.5, 4);
+        expect(profile.evaluateVelocityAt(1)).toBeCloseTo(1.3820, 4);
+
+        var indexSeg2 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: 0,
+                tf: 1.25,
+                p0: 0,
+                pf: 2,
+                v: indexSeg1.evaluateVelocityAt(indexSeg1.finalTime),
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'incremental'
+        }));
+
+        // type, t0, tf, initialLoad, finalLoad
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
+        profile.addLoadSegment(loadSeg1);
+
+        console.dir(profile.getAllSegments());
+
+        var profileJSON = motionProfileFactory.serialize(profile);
+        console.log(profileJSON);
+        var reconstructedProfile = motionProfileFactory.deserialize(profileJSON);
+
+        expect(reconstructedProfile.type).toBe("linear");
+        expect(reconstructedProfile.evaluateVelocityAt(0)).toBeCloseTo(12.5, 4);
+        expect(reconstructedProfile.evaluateVelocityAt(1.25)).toBeCloseTo(12.5, 4);
+        expect(reconstructedProfile.evaluateVelocityAt(1)).toBeCloseTo(1.3820, 4);
+        expect(reconstructedProfile.evaluateVelocityAt(1)).toBeCloseTo(1.3820, 4);
+        // console.log(reconstructedProfile);
+    });
 });
 
 
 describe('Unit: motionProfileFactory testing', function() {
-
     var motionProfileFactory = require('../lib/profile/motionProfile');
-    var accelSegmentFactory=require('../lib/segments/accelSegment');
-    var indexSegmentFactory=require('../lib/segments/indexSegment');
-    var fastMath=require('../lib/util/fastMath');
-    var ph=require('../lib/profile/profileHelper');
-
-
+    var accelSegmentFactory = require('../lib/segments/accelSegment');
+    var indexSegmentFactory = require('../lib/segments/indexSegment');
+    var fastMath = require('../lib/util/fastMath');
+    var ph = require('../lib/profile/profileHelper');
 
     it('should create an empty rotary profile', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        expect(profile.ProfileType).toBe('rotary');
+        expect(profile.type).toBe('rotary');
         expect(profile.getAllBasicSegments.length).toBe(0);
     });
 
@@ -134,7 +233,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var profile = motionProfileFactory.createMotionProfile("linear");
 
-        expect(profile.ProfileType).toBe('linear');
+        expect(profile.type).toBe('linear');
         expect(profile.getAllBasicSegments.length).toBe(0);
     });
 
@@ -163,8 +262,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
-
-
     });
 
     it('should correctly delete an accel segment that is NOT the last segment', function() {
@@ -238,7 +335,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should correctly find existing segments with exact matches', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -254,11 +350,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         existing = profile.getExistingSegment(2);
         expect(existing.initialTime).toBe(2);
-
     });
 
     it('should not find any segments before and after the existing profile segment range', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -277,7 +371,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should find existing segments, even if initialTime is off by some number less than epsilon', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -297,7 +390,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('should insert a segment in between two other segments', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -319,11 +411,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         //also, the profile needs to be valid
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
-
     });
 
     it('should insert a segment before an existing first segment', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -344,7 +434,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to find parent segment via its child segment id", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
@@ -370,7 +459,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it('appending a segment should match final conditions of the previous segment ', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 5, 0.5);
@@ -388,7 +476,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to find parent segment via its child segment id", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
@@ -404,8 +491,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(seg1);
 
-
-
         var allSegments = profile.getAllBasicSegments();
 
         var childSegment = allSegments[1];
@@ -413,16 +498,11 @@ describe('Unit: motionProfileFactory testing', function() {
         var parent = profile.findParentSegmentByChildId(childSegment.id);
 
         expect(parent).toBe(seg1);
-
-
-
     });
 
 
     it('it should append incremental segment after absolute segment and correctly evalute final values ', function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
-
         var accelSegment1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 5, 0.5, "absolute");
 
         profile.appendSegment(accelSegment1);
@@ -431,18 +511,14 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(accelSegment2);
 
-
         var allBasicSegments = profile.getAllSegments();
 
         //also, the profile needs to be valid
         expect(allBasicSegments[1].finalTime).toBe(4);
-
-
     });
+
     it("should be able to create segments via motionProfile accel segment function", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
-
         var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
             t0: 0,
             tf: 2,
@@ -471,7 +547,6 @@ describe('Unit: motionProfileFactory testing', function() {
             pf: 5,
             jPct: 0.5,
             mode: "incremental"
-
         });
 
         profile.appendSegment(seg1);
@@ -539,7 +614,6 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
     it("should be able to modify final time, final position and jerk for AccelSegmentTimeDistance segment ", function() {
-
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
@@ -998,8 +1072,6 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(accSeg2.evaluatePositionAt(accSeg2.finalTime)).toBeCloseTo(58.5, 4);
         expect(accSeg2.evaluatePositionAt(7.0995575)).toBeCloseTo(324.80518657, 4);
 
-        // console.log(accSeg1.getFinalValues());
-
         // (t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode)
         var indexSeg1 = profile.insertSegment(
             indexSegmentFactory.Make(
@@ -1057,19 +1129,10 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(accSeg2B.evaluateVelocityAt(13)).toBeCloseTo(-75.4511, 4); // this value is wrong
 
         expect(accSeg2B.evaluateAccelerationAt(8)).toBeCloseTo(-19.6775, 4);
-
-
-        // expect(indexSeg.finalTime).toBe(2.67);
-        // expect(indexSeg.initialTime).toBe(accSeg1.finalTime);
         // expect(indexSeg.evaluatePositionAt(indexSeg.finalTime)).toBeCloseTo(50.5);
-
         // expect(indexSeg.evaluatePositionAt(indexSeg.initialTime)).toBe(38.5);
-
-        // expect(accSeg2.initialTime).toBe(2.67);
-        // expect(accSeg2.finalTime).toBe(13);
         // expect(accSeg2.evaluatePositionAt(accSeg2.initialTime)).toBeCloseTo(50.5, 4);
         // expect(accSeg2.evaluatePositionAt(accSeg2.finalTime)).toBeCloseTo(124, 4);
-        // expect(accSeg2.segmentData.jerkPercent).toBe(0.5);
         // expect(accSeg2.evaluatePositionAt(8.8)).toBeCloseTo(274.64365, 4);
         // expect(accSeg2.evaluateVelocityAt(8.8)).toBeCloseTo(-21.0651, 4);
     });
