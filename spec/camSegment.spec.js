@@ -1,4 +1,5 @@
 var camSegment= require('../lib/segments/camSegment');
+var BasicSegment=require('../lib/segments/basicSegment');
 
 
 
@@ -86,59 +87,56 @@ describe("Linear interpolation", function () {
 
 
 
-describe("Full table calculations", function () {
-    it('Should have the validated results', function () {
-        var result = camSegment.calculateCamCoefficients([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
-        // console.log(result);
-        expect(result).toEqual(
-            [[0,
-                4.440892098500626e-16,
-                3.583333333333333,
-                -1.5833333333333333],
-              [2,
-                2.4166666666666665,
-                -1.1666666666666667,
-                0.22916666666666666],
-              [4, 0.5, 0, 0],
-              [5, 0.5, 1.5, -0.5]]
-              );
-    });
-});
+// describe("Full table calculations", function () {
+//     it('Should have the validated results', function () {
+//         var result = camSegment.calculateCamCoefficients([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
+//         // console.log(result);
+//         expect(result).toEqual(
+//             [[0,
+//                 4.440892098500626e-16,
+//                 3.583333333333333,
+//                 -1.5833333333333333],
+//               [2,
+//                 2.4166666666666665,
+//                 -1.1666666666666667,
+//                 0.22916666666666666],
+//               [4, 0.5, 0, 0],
+//               [5, 0.5, 1.5, -0.5]]
+//               );
+//     });
+// });
 
 
 
-xdescribe('Unit: cam segment (logix element) testing', function() {
+describe('Unit: cam segment (logix element) testing', function() {
 
 
 
 
     it('should create a valid cam segment using ', function() {
 
-        var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+        var basicSegs = camSegment.calculateBasicSegments([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
 
-        expect(seg.getAllSegments().length).toBe(3);
+        expect(basicSegs.length).toBe(4);
+        expect(basicSegs.every(function(seg){
+            return seg instanceof BasicSegment.BasicMotionSegment;
+        }));
 
-        var seg1 = seg.getAllSegments()[0];
-        var seg2 = seg.getAllSegments()[1];
-        var seg3 = seg.getAllSegments()[2];
-
-
-
-        expect(seg1.initialTime).toBe(0);
-        expect(seg1.finalTime).toBe(0.5);
-        expect(seg1.evaluatePositionAt(0)).toBe(0);
-        expect(seg1.evaluatePositionAt(0.5)).toBeCloseTo(0.2777777, 4);
-
-        expect(seg2.initialTime).toBe(0.5);
-        expect(seg2.finalTime).toBe(1.5);
-        expect(seg2.evaluatePositionAt(0.5)).toBeCloseTo(0.2777777, 4);
-        expect(seg2.evaluatePositionAt(1.5)).toBeCloseTo(5.2777777777777, 4);
+        var seg0=basicSegs[0];
+        var seg1=basicSegs[1];
+        var seg2=basicSegs[2];
+        var seg3=basicSegs[3];
 
 
-        expect(seg3.initialTime).toBe(1.5);
-        expect(seg3.finalTime).toBe(2);
-        expect(seg3.evaluatePositionAt(1.5)).toBeCloseTo(5.2777777777777, 4);
-        expect(seg3.evaluatePositionAt(2)).toBe(10);
+        expect(seg0.evaluatePositionAt(0.5)).toBeCloseTo(0.6979125,5);
+        expect(seg0.evaluateVelocityAt(0.5)).toBeCloseTo(2.395825,4);
+
+        expect(seg1.evaluatePositionAt(1.5)).toBeCloseTo(2.94531225,5);
+
+        expect(seg2.evaluatePositionAt(4)).toBeCloseTo(4.5,5);
+
+        expect(seg3.evaluatePositionAt(6)).toBeCloseTo(6.625,5);
+
 
     });
 
