@@ -1,4 +1,4 @@
-var camSegment= require('../lib/segments/camSegment');
+var CamSegment= require('../lib/segments/camSegment');
 var BasicSegment=require('../lib/segments/basicSegment');
 
 
@@ -10,14 +10,14 @@ describe('Cubic spline calculations', function () {
     describe('Should solve points (1,2),(2,4)', function () {
 
         it('Result with zero initial slopes should be [2,0,6,-4]', function () {
-            var result = camSegment.calculateCubic([1, 2], [2, 4], 0, 0);
+            var result = CamSegment.calculateCubic([1, 2], [2, 4], 0, 0);
             // console.log(result);
             expect(result).toEqual([[2, 0, 6, -4]]);
 
         });
 
         it('Result with s0=1, sf=2 should be [2,1,2,-1]', function () {
-            var result = camSegment.calculateCubic([1, 2], [2, 4], 1, 2);
+            var result = CamSegment.calculateCubic([1, 2], [2, 4], 1, 2);
             // console.log(result);         
             expect(result).toEqual([[2, 1, 2, -1]]);
         });
@@ -26,14 +26,14 @@ describe('Cubic spline calculations', function () {
 
     describe('should solve points (0,2)(2,4)', function () {
         it('Result with s0=1, sf=2 should be [2,1,2,-1]', function () {
-            var result = camSegment.calculateCubic([0, 1], [2, 4], 1, 2);
+            var result = CamSegment.calculateCubic([0, 1], [2, 4], 1, 2);
             // console.log(result);
             expect(result).toEqual([[2, 1, 2, -1]]);
 
         });
 
         it('Result with s0=-1, sf=2 should be [2,1,6,-3]', function () {
-            var result = camSegment.calculateCubic([0, 1], [2, 4], -1, 2);
+            var result = CamSegment.calculateCubic([0, 1], [2, 4], -1, 2);
             // console.log(result);
             expect(result).toEqual([[2, -1, 6, -3]]);
 
@@ -43,7 +43,7 @@ describe('Cubic spline calculations', function () {
 
     describe('should solve points (0,0),(1,0),(3,2),(4,2)', function () {
         it('Result with s0=1 and sf=0 should be [', function () {
-            var result = camSegment.calculateCubic([0, 1, 3, 4], [0, 0, 2, 2], 0, 0);
+            var result = CamSegment.calculateCubic([0, 1, 3, 4], [0, 0, 2, 2], 0, 0);
             // console.log(result);         
             expect(result).toEqual(
                 [[0, 0, -0.4285714285714286, 0.4285714285714286],
@@ -61,7 +61,7 @@ describe('Cubic spline calculations', function () {
 describe("Linear interpolation", function () {
     describe('should solve points (0,2)(2,4)', function () {
         it('Result should be [[2,1]]', function () {
-            var result = camSegment.calculateLinear([0, 2], [2, 4]);
+            var result = CamSegment.calculateLinear([0, 2], [2, 4]);
             // console.log(result);     
             expect(result.length).toBe(1);
             expect(result).toEqual([[2, 1, 0, 0]]);
@@ -71,7 +71,7 @@ describe("Linear interpolation", function () {
     describe('should solve points (0,2)(2,4),(4,4)', function () {
         it('Result should be [ [ 2, 1,0,0 ], [ 4, 0,0,0 ]]', function () {
             // console.log(result);     
-            var result = camSegment.calculateLinear([0, 2, 4], [2, 4, 4]);
+            var result = CamSegment.calculateLinear([0, 2, 4], [2, 4, 4]);
             expect(result).toEqual([[2, 1, 0, 0], [4, 0, 0, 0]]);
         });
     });
@@ -79,7 +79,7 @@ describe("Linear interpolation", function () {
     describe('should solve points (0,2)(2,4),(4,5)', function () {
         it('Result should be [ [ 2, 1,0,0 ], [ 4, 0.5,0,0 ]]', function () {
             // console.log(result);     
-            var result = camSegment.calculateLinear([0, 2, 4], [2, 4, 5]);
+            var result = CamSegment.calculateLinear([0, 2, 4], [2, 4, 5]);
             expect(result).toEqual([[2, 1, 0, 0], [4, 0.5, 0, 0]]);
         });
     });
@@ -89,7 +89,7 @@ describe("Linear interpolation", function () {
 
 // describe("Full table calculations", function () {
 //     it('Should have the validated results', function () {
-//         var result = camSegment.calculateCamCoefficients([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
+//         var result = CamSegment.calculateCamCoefficients([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
 //         // console.log(result);
 //         expect(result).toEqual(
 //             [[0,
@@ -112,10 +112,11 @@ describe('Unit: cam segment (logix element) testing', function() {
 
 
 
+    //https://www.desmos.com/calculator/gasixq8we2
 
-    it('should create a valid cam segment using ', function() {
+    it('should create a valid cam segment using [0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1]', function() {
 
-        var basicSegs = camSegment.calculateBasicSegments([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
+        var basicSegs = CamSegment.calculateBasicSegments([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
 
         expect(basicSegs.length).toBe(4);
         expect(basicSegs.every(function(seg){
@@ -139,5 +140,88 @@ describe('Unit: cam segment (logix element) testing', function() {
 
 
     });
+
+
+    it ('should create a new cam segment with default values', function(){
+        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+
+        expect(camSeg instanceof CamSegment.CamMotionSegment);
+
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.5);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
+
+    });
+
+
+    it ('should create a new cam segment with default values and then change initial values', function(){
+        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+
+        expect(camSeg instanceof CamSegment.CamMotionSegment);
+
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.5);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
+
+
+        camSeg.modifyInitialValues(1,1,2);
+
+        expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
+        expect(camSeg.evaluatePositionAt(1.5)).toBe(1.75);
+
+
+    });    
+
+
+
+    it ('should create a new cam segment with default values, change initial values forward and then change them again', function(){
+        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+
+        expect(camSeg instanceof CamSegment.CamMotionSegment);
+
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.5);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
+
+
+        camSeg.modifyInitialValues(1,1,2);
+
+        expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
+        expect(camSeg.evaluatePositionAt(1.5)).toBe(1.75);
+
+        //initial velocity is 1
+        camSeg.modifyInitialValues(0,0,1);
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.25);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(0.625);
+
+        //initial velocity is 10
+        camSeg.modifyInitialValues(0,0,10);
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(-1);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(1.75);
+
+
+    });   
+
+    it ('should create a new cam segment with default values, then change the cam table to [0,1,2],[0,1,2]', function(){
+        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+
+        expect(camSeg instanceof CamSegment.CamMotionSegment);
+
+        expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.5);
+        expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
+
+        camSeg.modifySegmentValues([0,1,2],[0,1,2],[1,1],0);
+
+        expect(camSeg.evaluatePositionAt(1)).toBe(1);
+        expect(camSeg.evaluateVelocityAt(1)).toBeCloseTo(1.5,6);
+
+
+
+        camSeg.modifySegmentValues([0,1,2,3],[0,1,2,3],[1,1,1],2);
+
+        expect(camSeg.evaluatePositionAt(1.5)).toBeCloseTo(1.5833333,6);
+        expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
+
+
+    });   
+
+
 
 });
