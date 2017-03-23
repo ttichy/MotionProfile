@@ -248,6 +248,23 @@ describe('Unit: cam segment (logix element) testing', function() {
 
     });   
 
+    it ('CamTable should not validate when master values are not sorted', function(){
+
+        var camTable = new CamSegment.CamTable();
+        camTable.master=[0,1,2,3];
+        camTable.slave=[0,1,2,3];
+        camTable.interpolation=[1,1,1];
+        camTable.finalSlope=2;
+
+        expect(camTable.validate()).toBe(true);
+
+
+        camTable.master=[1,0,2,3];
+        expect(camTable.validate).toThrow();
+
+
+    });     
+
 
 
 });
