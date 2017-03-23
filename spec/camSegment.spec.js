@@ -116,7 +116,15 @@ describe('Unit: cam segment (logix element) testing', function() {
 
     it('should create a valid cam segment using [0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1]', function() {
 
-        var basicSegs = CamSegment.calculateBasicSegments([0, 1, 3, 5, 7], [0, 2, 4, 5, 8], [1, 1, 0, 1], 0, 0);
+
+        var camTable=new CamSegment.CamTable();
+        camTable.master=[0, 1, 3, 5, 7];
+        camTable.slave=[0, 2, 4, 5, 8];
+        camTable.interpolation=[1, 1, 0, 1];
+        camTable.initialSlope=0;
+        camTable.finalSlope=0;
+
+        var basicSegs = CamSegment.calculateBasicSegments(camTable);
 
         expect(basicSegs.length).toBe(4);
         expect(basicSegs.every(function(seg){
@@ -199,7 +207,7 @@ describe('Unit: cam segment (logix element) testing', function() {
 
     });   
 
-    it ('should create a new cam segment with default values, then change the cam table to [0,1,2],[0,1,2]', function(){
+    it ('should create a new cam segment with default values, then change the cam table to [0,1,2],[0,1,2], then change finalSlope to 2', function(){
         var camSeg=CamSegment.createCamSegment(0, 0, 0);
 
         expect(camSeg instanceof CamSegment.CamMotionSegment);
@@ -207,14 +215,32 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.5);
         expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
 
-        camSeg.modifySegmentValues([0,1,2],[0,1,2],[1,1],0);
+
+        var camTable = new CamSegment.CamTable();
+        camTable.master=[0,1,2];
+        camTable.slave=[0,1,2];
+        camTable.interpolation=[1,1];
+        camTable.initialSlope=0;
+        camTable.finalSlope=0;
+
+
+        var newSegmentData= {
+            camTable: camTable
+        };
+
+        camSeg.modifySegmentValues(newSegmentData);
 
         expect(camSeg.evaluatePositionAt(1)).toBe(1);
         expect(camSeg.evaluateVelocityAt(1)).toBeCloseTo(1.5,6);
 
+        camTable.master=[0,1,2,3];
+        camTable.slave=[0,1,2,3];
+        camTable.interpolation=[1,1,1];
+        camTable.finalSlope=2;
 
+        newSegmentData.camTable=camTable;
 
-        camSeg.modifySegmentValues([0,1,2,3],[0,1,2,3],[1,1,1],2);
+        camSeg.modifySegmentValues(newSegmentData);
 
         expect(camSeg.evaluatePositionAt(1.5)).toBeCloseTo(1.5833333,6);
         expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);

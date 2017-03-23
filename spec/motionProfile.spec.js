@@ -1015,4 +1015,48 @@ describe('Unit: motionProfileFactory testing', function() {
 
     });       
 
+
+    it('should create a profile with an accel segment and  two cam segments, then delete the accel segment', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        profile.appendSegment(accelSeg);
+        
+
+        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        profile.appendSegment(camSeg1);
+
+        var finVal1 = camSeg1.getFinalValues();
+
+        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+
+
+        profile.appendSegment(camSeg2);
+
+        expect(profile.getAllSegments().length).toBe(3);
+
+        expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
+        expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
+        
+        expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
+        expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
+
+
+        expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
+
+
+        profile.deleteSegment(accelSeg.id);
+
+        expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
+        expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
+        
+        expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
+        expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
+
+
+
+    });     
+
 });
