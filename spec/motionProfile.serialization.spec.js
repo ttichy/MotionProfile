@@ -128,18 +128,18 @@ describe('Unit: profile serialization testing', function() {
 
         var newProfile = motionProfileFactory.deserialize(json);
 
-        var allSegments=newProfile.getAllSegments();
+        var allSegments = newProfile.getAllSegments();
 
         expect(allSegments.length).toBe(2);
         expect(newProfile.getAllSegments()[0].evaluatePositionAt(1.1)).toBe(profile.getAllSegments()[0].evaluatePositionAt(1.1));
 
-        var loadSegments=profile.getAllLoadSegments();
+        var loadSegments = profile.getAllLoadSegments();
         expect(loadSegments.length).toBe(1);
         expect(loadSegments[0].evaluateLoadAt(1)).toBe(loadSeg1.evaluateLoadAt(1));
 
     });
 
-    it('should be able to serialize and deserialize profile with only index segments', function () {
+    it('should be able to serialize and deserialize profile with only index segments', function() {
         var profile = motionProfileFactory.createMotionProfile("linear");
 
         var indexSeg1 = profile.appendSegment(
@@ -158,7 +158,7 @@ describe('Unit: profile serialization testing', function() {
                 ySkew: null,
                 shape: 'trapezoid',
                 mode: 'absolute'
-        }));
+            }));
 
         // indexSeg1.getAllSegments().forEach(function (segment, i) {
         //     if (i == 5) {
@@ -193,7 +193,7 @@ describe('Unit: profile serialization testing', function() {
                 ySkew: null,
                 shape: 'trapezoid',
                 mode: 'incremental'
-        }));
+            }));
 
         // type, t0, tf, initialLoad, finalLoad
         var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
@@ -202,7 +202,7 @@ describe('Unit: profile serialization testing', function() {
         console.dir(profile.getAllSegments());
 
         var profileJSON = motionProfileFactory.serialize(profile);
-        console.log(profileJSON);
+        // console.log(profileJSON);
         var reconstructedProfile = motionProfileFactory.deserialize(profileJSON);
 
         expect(reconstructedProfile.type).toBe("linear");
@@ -212,4 +212,95 @@ describe('Unit: profile serialization testing', function() {
         expect(reconstructedProfile.evaluateVelocityAt(1)).toBeCloseTo(1.3820, 4);
         // console.log(reconstructedProfile);
     });
+
+
+    it('should serialize and deserialize a profile consisting of only cam segments', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
+        var finVal1 = camSeg1.getFinalValues();
+
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+
+        profile.appendSegment(camSeg1);
+        profile.appendSegment(camSeg2);
+
+        expect(profile.getAllSegments().length).toBe(2);
+
+        expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
+        expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
+
+        expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
+        expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
+
+
+        var profileJSON = motionProfileFactory.serialize(profile);
+
+
+        var reconstructedProfile = motionProfileFactory.deserialize(profileJSON);
+
+
+        expect(reconstructedProfile.evaluatePositionAt(0.5)).toBe(0.5);
+        expect(reconstructedProfile.evaluateVelocityAt(0.5)).toBe(1.5);
+
+        expect(reconstructedProfile.evaluateVelocityAt(1.5)).toBe(1.5);
+        expect(reconstructedProfile.evaluatePositionAt(1.5)).toBe(1.5);
+
+    });
+
+
+    it('should serialize and deserialize a profile consisting of only accel, index, and cam segment', function() {
+       var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        profile.setInitialConditions(1, 2);
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0,
+            vf: 5,
+            jPct: 0.5,
+            mode: "incremental"
+
+        });
+
+        profile.appendSegment(seg1);
+        
+        var indexSeg2 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: 0,
+                tf: 1.25,
+                p0: 0,
+                pf: 2,
+                v: profile.evaluateVelocityAt(seg1.finalTime),
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'incremental'
+            }));
+
+        profile.appendSegment(
+            motionProfileFactory.createCamSegment(0,0,0));
+
+
+    var profileJson = motionProfileFactory.serialize(profile);
+
+    var reconstructedProfile = motionProfileFactory.deserialize(profileJson);
+
+
+    expect(reconstructedProfile.evaluatePositionAt(1.1)).toBe(profile.evaluatePositionAt(1.1));
+    expect(reconstructedProfile.evaluatePositionAt(2.1)).toBe(profile.evaluatePositionAt(2.1));
+
+
+
+    });
+
+
+
 });

@@ -2,7 +2,6 @@ describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var indexSegmentFactory = require('../lib/segments/indexSegment');
-    var CamSegment = require('../lib/segments/camSegment');
     var fastMath = require('../lib/util/fastMath');
     var ph = require('../lib/profile/profileHelper');
 
@@ -952,7 +951,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var camSeg = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg = motionProfileFactory.createCamSegment(0, 0, 0);
 
         profile.appendSegment(camSeg);
 
@@ -968,10 +967,10 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
         profile.appendSegment(camSeg1);
         profile.appendSegment(camSeg2);
@@ -995,12 +994,12 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(accelSeg);
         
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
 
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
 
         profile.appendSegment(camSeg2);
@@ -1025,12 +1024,12 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(accelSeg);
         
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
 
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
 
         profile.appendSegment(camSeg2);
@@ -1069,12 +1068,12 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(accelSeg);
         
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
 
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
 
         profile.appendSegment(camSeg2);
@@ -1106,7 +1105,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         // undo deletion
         profile.undo();
-        
+
         expect(profile.getAllSegments().length).toBe(3);
 
         expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
