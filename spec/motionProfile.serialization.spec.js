@@ -301,6 +301,42 @@ describe('Unit: profile serialization testing', function() {
 
     });
 
+    it('should serialize and deserialize a profile consisting of an accel segment and a load segments', function() {
+    
+        var profile = motionProfileFactory.createMotionProfile("rotary");
 
+        profile.setInitialConditions(1, 2);
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-velocity", {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0,
+            vf: 5,
+            jPct: 0.5,
+            mode: "incremental"
+
+        });
+
+        profile.appendSegment(seg1);
+
+        var loadSeg = motionProfileFactory.createLoadSegment("INERTIA",0,2,-1,1);
+
+        profile.addLoadSegment(loadSeg);
+
+
+
+        var profileJSON = motionProfileFactory.serialize(profile);
+
+
+        var recreatedProfile=motionProfileFactory.deserialize(profileJSON);
+
+
+        var recLoadSeg = recreatedProfile.getAllLoadSegments("INERTIA")[0];
+
+        expect(recLoadSeg.evaluateLoadAt(1.25)).toBe(loadSeg.evaluateLoadAt(1.25));
+
+
+    });
 
 });

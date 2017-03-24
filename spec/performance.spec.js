@@ -1,4 +1,4 @@
-describe('Unit: motionProfileFactory performance testing', function() {
+xdescribe('Unit: motionProfileFactory performance testing', function() {
 
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
