@@ -1125,7 +1125,7 @@ describe('Unit: Profile Exporting', function () {
 
     });
 
-        it('Should export basic segments for an index segment', function () {
+    it('Should export basic segments for an index segment', function () {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         var indexSeg1 = profile.appendSegment(
@@ -1151,6 +1151,12 @@ describe('Unit: Profile Exporting', function () {
 
         var pbs = profile.generateBasicSegments();
         // console.log(pbs);
-        console.log(JSON.stringify(pbs));
+        // console.log(JSON.stringify(pbs));
     });
+
+    it('Should export an empty profile', function () {
+        profile = motionProfileFactory.createMotionProfile('rotary');
+        var x = profile.getAllBasicSegments();
+    });
+
 });
