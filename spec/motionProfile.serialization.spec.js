@@ -160,18 +160,6 @@ describe('Unit: profile serialization testing', function() {
                 mode: 'absolute'
             }));
 
-        // indexSeg1.getAllSegments().forEach(function (segment, i) {
-        //     if (i == 5) {
-        //         console.log(segment.initialTime);
-        //         console.log(segment.finalTime);
-        //         console.log(segment.initialVelocity);
-        //         console.log(segment.finalVelocity);
-        //         console.log(segment.evaluateVelocityAt(segment.finalTime));
-        //         console.log(segment.evaluatePositionAt(segment.finalTime));
-        //         console.log(segment.positionPoly);
-        //         console.log(segment.velocityPoly);
-        //     }
-        // });
         expect(indexSeg1.initialTime).toBe(0);
         expect(indexSeg1.finalTime).toBe(1.25);
         expect(profile.evaluateVelocityAt(0)).toBeCloseTo(12.5, 4);
@@ -199,7 +187,7 @@ describe('Unit: profile serialization testing', function() {
         var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
         profile.addLoadSegment(loadSeg1);
 
-        console.dir(profile.getAllSegments());
+        // console.dir(profile.getAllSegments());
 
         var profileJSON = motionProfileFactory.serialize(profile);
         // console.log(profileJSON);
@@ -267,7 +255,7 @@ describe('Unit: profile serialization testing', function() {
         });
 
         profile.appendSegment(seg1);
-        
+
         var indexSeg2 = profile.appendSegment(
             motionProfileFactory.createIndexSegment({
                 t0: 0,
@@ -302,7 +290,7 @@ describe('Unit: profile serialization testing', function() {
     });
 
     it('should serialize and deserialize a profile consisting of an accel segment and a load segments', function() {
-    
+
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         profile.setInitialConditions(1, 2);
