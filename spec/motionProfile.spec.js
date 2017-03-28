@@ -1225,6 +1225,9 @@ describe('Unit: Profile Exporting', function () {
 
     });
 
+        it('Should export basic segments for an index segment', function () {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
         var indexSeg1 = profile.appendSegment(
                 motionProfileFactory.createIndexSegment({
                     //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
@@ -1247,7 +1250,7 @@ describe('Unit: Profile Exporting', function () {
         profile.addLoadSegment(loadSeg1);
 
         var pbs = profile.generateBasicSegments();
-        // console.log(pbs);
-        // console.log(JSON.stringify(pbs));
+        console.log(pbs);
+        console.log(JSON.stringify(pbs));
     });
 });
