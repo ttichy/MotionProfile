@@ -207,7 +207,6 @@ describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var indexSegmentFactory = require('../lib/segments/indexSegment');
-    var CamSegment = require('../lib/segments/camSegment');
     var fastMath = require('../lib/util/fastMath');
     var ph = require('../lib/profile/profileHelper');
 
@@ -1162,7 +1161,7 @@ describe('Unit: Profile Exporting', function () {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var camSeg = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg = motionProfileFactory.createCamSegment(0, 0, 0);
 
         profile.appendSegment(camSeg);
 
@@ -1178,10 +1177,10 @@ describe('Unit: Profile Exporting', function () {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
         profile.appendSegment(camSeg1);
         profile.appendSegment(camSeg2);
@@ -1205,12 +1204,12 @@ describe('Unit: Profile Exporting', function () {
         profile.appendSegment(accelSeg);
 
 
-        var camSeg1 = CamSegment.createCamSegment(0, 0, 0);
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
 
         var finVal1 = camSeg1.getFinalValues();
 
-        var camSeg2 = CamSegment.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
 
 
         profile.appendSegment(camSeg2);
@@ -1224,6 +1223,112 @@ describe('Unit: Profile Exporting', function () {
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
     });
+
+
+    it('should create a profile with an accel segment and  two cam segments, then delete the accel segment', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        profile.appendSegment(accelSeg);
+        
+
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
+        profile.appendSegment(camSeg1);
+
+        var finVal1 = camSeg1.getFinalValues();
+
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+
+
+        profile.appendSegment(camSeg2);
+
+        expect(profile.getAllSegments().length).toBe(3);
+
+        expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
+        expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
+        
+        expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
+        expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
+
+
+        expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
+
+
+        profile.deleteSegment(accelSeg.id);
+
+        expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
+        expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
+        
+        expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
+        expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
+
+
+
+    });     
+
+
+    it('should create a profile with an accel segment and  two cam segments, then delete the accel segment, then undo and redo', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        profile.appendSegment(accelSeg);
+        
+
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
+        profile.appendSegment(camSeg1);
+
+        var finVal1 = camSeg1.getFinalValues();
+
+        var camSeg2 = motionProfileFactory.createCamSegment(finVal1[0], finVal1[3], finVal1[2]);
+
+
+        profile.appendSegment(camSeg2);
+
+        expect(profile.getAllSegments().length).toBe(3);
+
+        expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
+        expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
+        
+        expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
+        expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
+
+
+        expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
+
+
+        //delete the segment
+
+        profile.deleteSegment(accelSeg.id);
+
+        //check to make sure deletion was successful
+
+        expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
+        expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
+        
+        expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
+        expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
+
+
+        // undo deletion
+        profile.undo();
+
+        expect(profile.getAllSegments().length).toBe(3);
+
+        expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
+        expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
+        
+        expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
+        expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
+
+
+        expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
+
+
+    });    
 
         it('Should export basic segments for an index segment', function () {
         var profile = motionProfileFactory.createMotionProfile('linear');
