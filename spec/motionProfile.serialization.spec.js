@@ -339,4 +339,13 @@ describe('Unit: profile serialization testing', function() {
 
     });
 
+
+
+    it('should export an empty profile', function() {
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var x= profile.getAllBasicSegments();
+    });
+
+
 });
