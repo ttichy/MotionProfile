@@ -47,6 +47,41 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
     });
 
+    it('Should correctly return segment info when deleting and appending segments', function () {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
+        var accelSegment = profile.appendSegment(
+            motionProfileFactory.createAccelSegment('time-velocity', {
+                t0: 0,
+                tf: 0.7,
+                p0: 0,
+                v0: 0,
+                vf: 1.5,
+                jPct: 0.2,
+                mode: 'absolute'
+        }));
+
+        var indexSeg = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: accelSegment.finalTime,
+                tf: accelSegment.finalTime + 1.67,
+                p0: accelSegment.evaluatePositionAt(accelSegment.finalTime),
+                pf: accelSegment.evaluatePositionAt(accelSegment.finalTime) + 12,
+                v: accelSegment.evaluateVelocityAt(accelSegment.finalTime),
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.1,
+                decJerk: 0.5,
+                xSkew: 0.3,
+                ySkew: 0.27,
+                shape: 'trapezoid',
+                mode: 'incremental'
+        }));
+
+        // delete the index segment
+        profile.deleteSegment(indexSeg.id);
+    });
+
     it('should correctly delete an accel segment that is NOT the last segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -227,7 +262,6 @@ describe('Unit: motionProfileFactory testing', function() {
             vf: 5,
             jPct: 0.5,
             mode: "incremental"
-
         });
 
         profile.appendSegment(seg1);
@@ -269,7 +303,6 @@ describe('Unit: motionProfileFactory testing', function() {
             vf: 5,
             jPct: 0.5,
             mode: "incremental"
-
         });
 
         profile.appendSegment(seg1);
@@ -1058,9 +1091,6 @@ describe('Unit: Profile Exporting', function () {
 
         expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
         expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
-
-
-
     });
 
 
@@ -1159,6 +1189,7 @@ describe('Unit: Profile Exporting', function () {
         var x = profile.getAllBasicSegments();
         expect(x.length).toBe(0);
         var y = profile.generateBasicSegments();
+        expect(y.length).toBe(0);
     });
 
     it('Should export a profile of an index segment and an accel segment and match the basic segments from V1', function () {
@@ -1369,7 +1400,6 @@ describe('Unit: Profile Exporting', function () {
         expect(pbs[9].FinalFriction).toBeCloseTo(0, 5);
         expect(pbs[9].InitialPosition).toBeCloseTo(18.366666666666688, 5);
         expect(pbs[9].FinalPosition).toBeCloseTo(-2.0, 5);
-
     });
 
 });
