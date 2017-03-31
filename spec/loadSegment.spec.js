@@ -107,7 +107,7 @@ describe('Unit: loadSegment testing', function() {
   });
 
 
-  it('should only be able to add one load segment per type', function() {
+  xit('should only be able to add one load segment per type', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -135,7 +135,7 @@ describe('Unit: loadSegment testing', function() {
   });
 
   // currently, only one load segment per type is supported.
-  xit('should only be able to add multiple non-overlapping load segments', function() {
+  it('should only be able to add multiple non-overlapping load segments', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -170,7 +170,7 @@ describe('Unit: loadSegment testing', function() {
   });
 
   // currently, only one load segment per type is supported.
-  xit('should throw when trying to add overlapping load segments', function() {
+  it('should throw when trying to add overlapping load segments', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
