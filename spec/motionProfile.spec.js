@@ -20,7 +20,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.getAllBasicSegments.length).toBe(0);
     });
 
-    it('should correctly delete an accel segment that is the last segment', function() {
+    xit('should correctly delete an accel segment that is the last segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -47,7 +47,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
     });
 
-    it('Should correctly return segment info when deleting and appending segments', function () {
+    it('Should correctly return segments length when deleting and appending segments', function () {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         var accelSegment = profile.appendSegment(
@@ -92,7 +92,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.getAllBasicSegments().length).toBe(10);
     });
 
-    it('should correctly delete an accel segment that is NOT the last segment', function() {
+    xit('should correctly delete an accel segment that is NOT the last segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -127,7 +127,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
     });
 
-    it('should correctly delete an accel segment the first segment', function() {
+    xit('should correctly delete an accel segment the first segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -598,7 +598,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(finalVel).toBe(2.5);
     });
 
-    it('should be able to undo appending a segment ', function() {
+    xit('should be able to undo appending a segment ', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -625,7 +625,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(allSegments.length).toBe(0);
     });
 
-    it('should be able to undo and redo appending segments ', function() {
+    xit('should be able to undo and redo appending segments ', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -664,7 +664,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(allSegments[1]).toBe(accelSegment2);
     });
 
-    it('should be able to undo and redo deleting segments ', function() {
+    xit('should be able to undo and redo deleting segments ', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -702,7 +702,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(allSegments.length).toBe(0);
     });
 
-    it('should insert a segment in between two other segments, then undo and redo', function() {
+    xit('should insert a segment in between two other segments, then undo and redo', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -738,7 +738,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(allSegments[2]).toBe(accelSegment2);
     });
 
-    it("should be able to modify final position and then undo and redo it", function() {
+    xit("should be able to modify final position and then undo and redo it", function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -788,11 +788,11 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(finalPos).toBe(5);
     });
 
-    it("should be able to add a load segment to the motion profile", function() {
+    xit("should be able to add a load segment to the motion profile", function() {
 
     });
 
-    it('should be able to append an index segment to an empty profile, then delete it', function() {
+    xit('should be able to append an index segment to an empty profile, then delete it', function() {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
@@ -1062,7 +1062,7 @@ describe('Unit: Profile Exporting', function () {
     });
 
 
-    it('should create a profile with an accel segment and  two cam segments, then delete the accel segment', function() {
+    xit('should create a profile with an accel segment and  two cam segments, then delete the accel segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -1103,7 +1103,7 @@ describe('Unit: Profile Exporting', function () {
     });
 
 
-    it('should create a profile with an accel segment and  two cam segments, then delete the accel segment, then undo and redo', function() {
+    xit('should create a profile with an accel segment and  two cam segments, then delete the accel segment, then undo and redo', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
