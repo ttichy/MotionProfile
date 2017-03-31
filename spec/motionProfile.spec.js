@@ -944,9 +944,14 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.getAllSegments().length).toBe(0);
 
     });
+});
 
 
-
+describe('Unit: Profile Exporting', function () {
+    var motionProfileFactory = require('../lib/profile/motionProfile');
+    var accelSegmentFactory = require('../lib/segments/accelSegment');
+    var indexSegmentFactory = require('../lib/segments/indexSegment');
+    var fastMath = require('../lib/util/fastMath');
     it('should create a profile with only a cam segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -979,11 +984,11 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
         expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
-        
+
         expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
         expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
 
-    });    
+    });
 
     it('should create a profile with an accel segment and  two cam segments', function() {
 
@@ -992,7 +997,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
 
         profile.appendSegment(accelSeg);
-        
+
 
         var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
@@ -1008,11 +1013,11 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
         expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
-        
+
         expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
-    });       
+    });
 
 
     it('should create a profile with an accel segment and  two cam segments, then delete the accel segment', function() {
@@ -1022,7 +1027,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
 
         profile.appendSegment(accelSeg);
-        
+
 
         var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
@@ -1038,7 +1043,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
         expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
-        
+
         expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
@@ -1050,13 +1055,13 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
         expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
-        
+
         expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
         expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
 
 
 
-    });     
+    });
 
 
     it('should create a profile with an accel segment and  two cam segments, then delete the accel segment, then undo and redo', function() {
@@ -1066,7 +1071,7 @@ describe('Unit: motionProfileFactory testing', function() {
         var accelSeg  = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
 
         profile.appendSegment(accelSeg);
-        
+
 
         var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0);
         profile.appendSegment(camSeg1);
@@ -1082,7 +1087,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
         expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
-        
+
         expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
@@ -1098,7 +1103,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
         expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
-        
+
         expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
         expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
 
@@ -1110,7 +1115,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
         expect(profile.evaluatePositionAt(0.5)).toBeCloseTo(0.277777777777,6);
         expect(profile.evaluateVelocityAt(0.5)).toBeCloseTo(1.66666667,5);
-        
+
         expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
@@ -1118,6 +1123,253 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
 
 
-    });    
+    });
+
+    xit('Should export basic segments for an index segment', function () {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
+        var indexSeg1 = profile.appendSegment(
+                motionProfileFactory.createIndexSegment({
+                    //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                    t0: 0,
+                    tf: 1.25,
+                    p0: 0,
+                    pf: 2,
+                    v: 12.5,
+                    velLimPos: null,
+                    velLimNeg: null,
+                    accJerk: 0.2,
+                    decJerk: 1,
+                    xSkew: null,
+                    ySkew: null,
+                    shape: 'trapezoid',
+                    mode: 'absolute'
+            }));
+
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 1.25, 0.02, 0.5);
+        profile.addLoadSegment(loadSeg1);
+
+        var pbs = profile.generateBasicSegments();
+        // console.log(pbs);
+        // console.log(JSON.stringify(pbs));
+    });
+
+    it('Should export an empty profile', function () {
+        profile = motionProfileFactory.createMotionProfile('rotary');
+        var x = profile.getAllBasicSegments();
+        expect(x.length).toBe(0);
+        var y = profile.generateBasicSegments();
+    });
+
+    it('Should export a profile of an index segment and an accel segment and match the basic segments from V1', function () {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
+        profile.setInitialConditions(0, 6, 0, 0, 0);
+
+        var indexSeg1 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                t0: 0,
+                tf:5.65,
+                p0: 0,
+                pf: 12,
+                v: 6,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 0.8,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'incremental'
+            }));
+
+        var accelSeg1 = profile.appendSegment(
+            motionProfileFactory.createAccelSegment('time-distance', {
+                t0: indexSeg1.segmentData.finalTime,
+                tf: 10,
+                p0: indexSeg1.segmentData.finalPosition,
+                v0: indexSeg1.segmentData.finalVelocity,
+                pf: -2,
+                jPct: 1,
+                mode: 'absolute',
+                loads: {
+                    friction: 0.3,
+                    thrust: 0,
+                    load: 0
+                }
+            }));
+
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 4.55, 0.02, 0.13);
+        profile.addLoadSegment(loadSeg1);
+
+        var pbs = profile.generateBasicSegments();
+        // console.log(JSON.stringify(pbs));
+
+        expect(pbs.length).toBe(10);
+
+        expect(pbs[0].InitialVelocity).toBeCloseTo(6.0, 5);
+        expect(pbs[0].FinalVelocity).toBeCloseTo(5.6769911504424773, 5);
+        expect(pbs[0].InitialTime).toBeCloseTo(0, 5);
+        expect(pbs[0].FinalTime).toBeCloseTo(0.188333, 5);
+        expect(pbs[0].InitialAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[0].FinalAcceleration).toBeCloseTo(-3.4301824731772279, 5);
+        expect(pbs[0].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[0].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[0].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[0].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[0].Jerk).toBeCloseTo(-18.213358264657828, 5);
+        expect(pbs[0].InitialFriction).toBeCloseTo(0.02, 5);
+        expect(pbs[0].FinalFriction).toBeCloseTo(0.024553113553113553, 5);
+        expect(pbs[0].InitialPosition).toBeCloseTo(0, 5);
+        expect(pbs[0].FinalPosition).toBeCloseTo(1.1097222222222223, 5);
+
+        expect(pbs[1].InitialVelocity).toBeCloseTo(5.6769911504424773, 5);
+        expect(pbs[1].FinalVelocity).toBeCloseTo(0.50884955752211969, 5);
+        expect(pbs[1].InitialTime).toBeCloseTo(0.188333, 5);
+        expect(pbs[1].FinalTime).toBeCloseTo(1.695, 5);
+        expect(pbs[1].InitialAcceleration).toBeCloseTo(-3.4301824731772279, 5);
+        expect(pbs[1].FinalAcceleration).toBeCloseTo(-3.4301824731772279, 5);
+        expect(pbs[1].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[1].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[1].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[1].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[1].Jerk).toBeCloseTo(0, 5);
+        expect(pbs[1].InitialFriction).toBeCloseTo(0.024553113553113553, 5);
+        expect(pbs[1].FinalFriction).toBeCloseTo(0.06097802197802199, 5);
+        expect(pbs[1].InitialPosition).toBeCloseTo(1.1097222222222223, 5);
+        expect(pbs[1].FinalPosition).toBeCloseTo(5.7697222222222218, 5);
+
+        expect(pbs[2].InitialVelocity).toBeCloseTo(0.50884955752211969, 5);
+        expect(pbs[2].FinalVelocity).toBeCloseTo(0.18584070796459695, 5);
+        expect(pbs[2].InitialTime).toBeCloseTo(1.695, 5);
+        expect(pbs[2].FinalTime).toBeCloseTo(1.883333, 5);
+        expect(pbs[2].InitialAcceleration).toBeCloseTo(-3.4301824731772279, 5);
+        expect(pbs[2].FinalAcceleration).toBeCloseTo(-2.2204460492503131E-15, 5);
+        expect(pbs[2].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[2].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[2].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[2].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[2].Jerk).toBeCloseTo(18.2133582646578, 5);
+        expect(pbs[2].InitialFriction).toBeCloseTo(0.06097802197802199, 5);
+        expect(pbs[2].FinalFriction).toBeCloseTo(0.065531135531135529, 5);
+        expect(pbs[2].InitialPosition).toBeCloseTo(5.7697222222222218, 5);
+        expect(pbs[2].FinalPosition).toBeCloseTo(5.8249999999999984, 5);
+
+        // console.log(pbs[3]);
+        // console.log(profile.evaluateVelocityAt(pbs[3].InitialTime));
+        expect(pbs[3].InitialVelocity).toBeCloseTo(0.18584070796459828, 5);
+        expect(pbs[3].FinalVelocity).toBeCloseTo(0.18584070796459828, 5);
+        expect(pbs[3].InitialTime).toBeCloseTo(1.883333, 5);
+        expect(pbs[3].FinalTime).toBeCloseTo(3.766667, 5);
+        expect(pbs[3].InitialAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[3].FinalAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[3].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[3].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[3].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[3].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[3].Jerk).toBeCloseTo(0, 5);
+        expect(pbs[3].InitialFriction).toBeCloseTo(0.065531135531135529, 5);
+        expect(pbs[3].FinalFriction).toBeCloseTo(0.11106227106227107, 5);
+        expect(pbs[3].InitialPosition).toBeCloseTo(5.8249999999999984, 5);
+        expect(pbs[3].FinalPosition).toBeCloseTo(6.1749999999999918, 5);
+
+        expect(pbs[4].InitialVelocity).toBeCloseTo(0.18584070796459828, 5);
+        expect(pbs[4].FinalVelocity).toBeCloseTo(2.1238938053097423, 5);
+        expect(pbs[4].InitialTime).toBeCloseTo(3.766667, 5);
+        expect(pbs[4].FinalTime).toBeCloseTo(4.52, 5);
+        expect(pbs[4].InitialAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[4].FinalAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[4].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[4].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[4].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[4].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[4].Jerk).toBeCloseTo(6.8300093, 5);
+        expect(pbs[4].InitialFriction).toBeCloseTo(0.11106227106227107, 5);
+        expect(pbs[4].FinalFriction).toBeCloseTo(0.12927472527472531, 5);
+        expect(pbs[4].InitialPosition).toBeCloseTo(6.1749999999999918, 5);
+        expect(pbs[4].FinalPosition).toBeCloseTo(6.80166666666666, 5);
+
+        expect(pbs[5].InitialVelocity).toBeCloseTo(2.1238938053097423, 5);
+        expect(pbs[5].FinalVelocity).toBeCloseTo(2.27825201660271, 5);
+        expect(pbs[5].InitialTime).toBeCloseTo(4.52, 5);
+        expect(pbs[5].FinalTime).toBeCloseTo(4.55, 5);
+        expect(pbs[5].InitialAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[5].FinalAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[5].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[5].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[5].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[5].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[5].Jerk).toBeCloseTo(0, 5);
+        expect(pbs[5].InitialFriction).toBeCloseTo(0.12927472527472531, 5);
+        expect(pbs[5].FinalFriction).toBeCloseTo(0.13, 5);
+        expect(pbs[5].InitialPosition).toBeCloseTo(6.80166666666666, 5);
+        expect(pbs[5].FinalPosition).toBeCloseTo(6.8676988539953427, 5);
+
+        expect(pbs[6].InitialVelocity).toBeCloseTo(2.27825201660271, 5);
+        expect(pbs[6].FinalVelocity).toBeCloseTo(4.0619469026548742, 5);
+        expect(pbs[6].InitialTime).toBeCloseTo(4.55, 5);
+        expect(pbs[6].FinalTime).toBeCloseTo(4.896667, 5);
+        expect(pbs[6].InitialAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[6].FinalAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[6].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[6].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[6].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[6].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[6].Jerk).toBeCloseTo(0, 5);
+        expect(pbs[6].InitialFriction).toBeCloseTo(0.13, 5);
+        expect(pbs[6].FinalFriction).toBeCloseTo(0, 5);
+        expect(pbs[6].InitialPosition).toBeCloseTo(6.8676988539953427, 5);
+        expect(pbs[6].FinalPosition).toBeCloseTo(7.966666666666657, 5);
+
+        expect(pbs[7].InitialVelocity).toBeCloseTo(4.0619469026548742, 5);
+        expect(pbs[7].FinalVelocity).toBeCloseTo(6.0000000000000142, 5);
+        expect(pbs[7].InitialTime).toBeCloseTo(4.896667, 5);
+        expect(pbs[7].FinalTime).toBeCloseTo(5.65, 5);
+        expect(pbs[7].InitialAcceleration).toBeCloseTo(5.1452737097658563, 5);
+        expect(pbs[7].FinalAcceleration).toBeCloseTo(-2.6645352591003757E-15, 5);
+        expect(pbs[7].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[7].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[7].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[7].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[7].Jerk).toBeCloseTo(-6.8300093, 5);
+        expect(pbs[7].InitialFriction).toBeCloseTo(0, 5);
+        expect(pbs[7].FinalFriction).toBeCloseTo(0, 5);
+        expect(pbs[7].InitialPosition).toBeCloseTo(7.966666666666657, 5);
+        expect(pbs[7].FinalPosition).toBeCloseTo(12.000000000000005, 5);
+
+        expect(pbs[8].InitialVelocity).toBeCloseTo(6.0000000000000142, 5);
+        expect(pbs[8].FinalVelocity).toBeCloseTo(-3.2183908045977, 5);
+        expect(pbs[8].InitialTime).toBeCloseTo(5.65, 5);
+        expect(pbs[8].FinalTime).toBeCloseTo(7.825, 5);
+        expect(pbs[8].InitialAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[8].FinalAcceleration).toBeCloseTo(-8.4766811996300842, 5);
+        expect(pbs[8].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[8].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[8].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[8].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[8].Jerk).toBeCloseTo(-3.8973246894850915, 5);
+        expect(pbs[8].InitialFriction).toBeCloseTo(0, 5);
+        expect(pbs[8].FinalFriction).toBeCloseTo(0, 5);
+        expect(pbs[8].InitialPosition).toBeCloseTo(12.000000000000005, 5);
+        expect(pbs[8].FinalPosition).toBeCloseTo(18.366666666666688, 5);
+
+        expect(pbs[9].InitialVelocity).toBeCloseTo(-3.2183908045977, 5);
+        expect(pbs[9].FinalVelocity).toBeCloseTo(-12.436781609195418, 5);
+        expect(pbs[9].InitialTime).toBeCloseTo(7.825, 5);
+        expect(pbs[9].FinalTime).toBeCloseTo(10, 5);
+        expect(pbs[9].InitialAcceleration).toBeCloseTo(-8.4766811996300842, 5);
+        expect(pbs[9].FinalAcceleration).toBeCloseTo(0, 5);
+        expect(pbs[9].InitialLoad).toBeCloseTo(0, 5);
+        expect(pbs[9].FinalLoad).toBeCloseTo(0, 5);
+        expect(pbs[9].InitialThrust).toBeCloseTo(0, 5);
+        expect(pbs[9].FinalThrust).toBeCloseTo(0, 5);
+        expect(pbs[9].Jerk).toBeCloseTo(3.8973246894850915, 5);
+        expect(pbs[9].InitialFriction).toBeCloseTo(0, 5);
+        expect(pbs[9].FinalFriction).toBeCloseTo(0, 5);
+        expect(pbs[9].InitialPosition).toBeCloseTo(18.366666666666688, 5);
+        expect(pbs[9].FinalPosition).toBeCloseTo(-2.0, 5);
+
+    });
 
 });

@@ -14,8 +14,6 @@ describe('Unit: accelSegmentFactory testing', function() {
         var seg2 = seg.getAllSegments()[1];
         var seg3 = seg.getAllSegments()[2];
 
-
-
         expect(seg1.initialTime).toBe(0);
         expect(seg1.finalTime).toBe(0.5);
         expect(seg1.evaluatePositionAt(0)).toBe(0);
@@ -26,12 +24,10 @@ describe('Unit: accelSegmentFactory testing', function() {
         expect(seg2.evaluatePositionAt(0.5)).toBeCloseTo(0.2777777, 4);
         expect(seg2.evaluatePositionAt(1.5)).toBeCloseTo(5.2777777777777, 4);
 
-
         expect(seg3.initialTime).toBe(1.5);
         expect(seg3.finalTime).toBe(2);
         expect(seg3.evaluatePositionAt(1.5)).toBeCloseTo(5.2777777777777, 4);
         expect(seg3.evaluatePositionAt(2)).toBe(10);
-
     });
 
     it('should create an accel segment (t0=2,tf=4,p0=10,v0=10,vf=0,j=0.5) and correctly evalute position and velocities', function() {
