@@ -1369,7 +1369,6 @@ describe('Unit: Profile Exporting', function () {
         expect(pbs[9].FinalFriction).toBeCloseTo(0, 5);
         expect(pbs[9].InitialPosition).toBeCloseTo(18.366666666666688, 5);
         expect(pbs[9].FinalPosition).toBeCloseTo(-2.0, 5);
-
     });
 
 });
