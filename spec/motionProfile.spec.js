@@ -64,22 +64,32 @@ describe('Unit: motionProfileFactory testing', function() {
         var indexSeg = profile.appendSegment(
             motionProfileFactory.createIndexSegment({
                 t0: accelSegment.finalTime,
-                tf: accelSegment.finalTime + 1.67,
+                tf: accelSegment.finalTime + 0.8,
                 p0: accelSegment.evaluatePositionAt(accelSegment.finalTime),
-                pf: accelSegment.evaluatePositionAt(accelSegment.finalTime) + 12,
+                pf: accelSegment.evaluatePositionAt(accelSegment.finalTime) - 1.45,
                 v: accelSegment.evaluateVelocityAt(accelSegment.finalTime),
                 velLimPos: null,
                 velLimNeg: null,
                 accJerk: 0.1,
-                decJerk: 0.5,
-                xSkew: 0.3,
-                ySkew: 0.27,
+                decJerk: 0,
+                xSkew: 0,
+                ySkew: 0.5,
                 shape: 'trapezoid',
                 mode: 'incremental'
         }));
 
+        // expect basic segments to be 2
+        expect(profile.getAllBasicSegments().length).toBe(8);
+
         // delete the index segment
         profile.deleteSegment(indexSeg.id);
+
+        // segments should be length 1
+        expect(profile.getAllBasicSegments().length).toBe(3);
+
+        profile.undo();
+
+        expect(profile.getAllBasicSegments().length).toBe(10);
     });
 
     it('should correctly delete an accel segment that is NOT the last segment', function() {
@@ -975,7 +985,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.clear();
         expect(profile.getAllSegments().length).toBe(0);
-
     });
 });
 
@@ -1126,17 +1135,14 @@ describe('Unit: Profile Exporting', function () {
 
 
         //delete the segment
-
         profile.deleteSegment(accelSeg.id);
 
         //check to make sure deletion was successful
-
         expect(profile.evaluatePositionAt(0.5)).toBe(0.5);
         expect(profile.evaluateVelocityAt(0.5)).toBe(1.5);
 
         expect(profile.evaluateVelocityAt(1.5)).toBe(1.5);
         expect(profile.evaluatePositionAt(1.5)).toBe(1.5);
-
 
         // undo deletion
         profile.undo();
@@ -1149,13 +1155,10 @@ describe('Unit: Profile Exporting', function () {
         expect(profile.evaluateVelocityAt(2.5)).toBe(-1);
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
-
         expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
-
-
     });
 
-    xit('Should export basic segments for an index segment', function () {
+    it('Should export basic segments for an index segment', function () {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         var indexSeg1 = profile.appendSegment(
