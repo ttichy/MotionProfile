@@ -22,8 +22,8 @@
     "karma-browserify": "^5.1.1",
     "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "^1.1.0",
-    "lodash": "^4.17.4",
     "numeric": "^1.2.6",
+    "underscore": "^1.8.3",
     "undo-manager": "^1.0.5",
     "watchify": "^3.9.0"
   },
