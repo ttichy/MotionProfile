@@ -89,7 +89,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.undo();
 
-        expect(profile.getAllBasicSegments().length).toBe(10);
+        // undoing the delete should return basic segments length to 8
+        expect(profile.getAllBasicSegments().length).toBe(8);
     });
 
     it('should correctly delete an accel segment that is NOT the last segment', function() {
@@ -1162,29 +1163,27 @@ describe('Unit: Profile Exporting', function () {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
         var indexSeg1 = profile.appendSegment(
-                motionProfileFactory.createIndexSegment({
-                    //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
-                    t0: 0,
-                    tf: 1.25,
-                    p0: 0,
-                    pf: 2,
-                    v: 12.5,
-                    velLimPos: null,
-                    velLimNeg: null,
-                    accJerk: 0.2,
-                    decJerk: 1,
-                    xSkew: null,
-                    ySkew: null,
-                    shape: 'trapezoid',
-                    mode: 'absolute'
-            }));
+            motionProfileFactory.createIndexSegment({
+                //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                t0: 0,
+                tf: 1.25,
+                p0: 0,
+                pf: 2,
+                v: 12.5,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'absolute'
+        }));
 
         var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 1.25, 0.02, 0.5);
         profile.addLoadSegment(loadSeg1);
 
         var pbs = profile.generateBasicSegments();
-        // console.log(pbs);
-        // console.log(JSON.stringify(pbs));
     });
 
     it('Should export an empty profile', function () {
@@ -1204,7 +1203,7 @@ describe('Unit: Profile Exporting', function () {
             motionProfileFactory.createIndexSegment({
                 //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
                 t0: 0,
-                tf:5.65,
+                tf: 5.65,
                 p0: 0,
                 pf: 12,
                 v: 6,
@@ -1216,7 +1215,8 @@ describe('Unit: Profile Exporting', function () {
                 ySkew: null,
                 shape: 'trapezoid',
                 mode: 'incremental'
-            }));
+            })
+        );
 
         var accelSeg1 = profile.appendSegment(
             motionProfileFactory.createAccelSegment('time-distance', {
@@ -1232,13 +1232,13 @@ describe('Unit: Profile Exporting', function () {
                     thrust: 0,
                     load: 0
                 }
-            }));
+            })
+        );
 
         var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 4.55, 0.02, 0.13);
         profile.addLoadSegment(loadSeg1);
 
         var pbs = profile.generateBasicSegments();
-        // console.log(JSON.stringify(pbs));
 
         expect(pbs.length).toBe(10);
 
@@ -1290,8 +1290,6 @@ describe('Unit: Profile Exporting', function () {
         expect(pbs[2].InitialPosition).toBeCloseTo(5.7697222222222218, 5);
         expect(pbs[2].FinalPosition).toBeCloseTo(5.8249999999999984, 5);
 
-        // console.log(pbs[3]);
-        // console.log(profile.evaluateVelocityAt(pbs[3].InitialTime));
         expect(pbs[3].InitialVelocity).toBeCloseTo(0.18584070796459828, 5);
         expect(pbs[3].FinalVelocity).toBeCloseTo(0.18584070796459828, 5);
         expect(pbs[3].InitialTime).toBeCloseTo(1.883333, 5);
