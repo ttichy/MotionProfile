@@ -789,9 +789,6 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(finalPos).toBe(5);
     });
 
-    it("should be able to add a load segment to the motion profile", function() {
-
-    });
 
     it('should be able to append an index segment to an empty profile, then delete it', function() {
         var profile = motionProfileFactory.createMotionProfile('linear');
@@ -1440,5 +1437,54 @@ describe('Unit: Profile Exporting', function () {
         var profile = motionProfileFactory.convertV1ToV2(mp);
 
     });
+
+    it('should be able create a profile with three segments, delete one, undo and get back to the original profile', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var accelSegment = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        profile.appendSegment(accelSegment);
+
+        var accelSegment2 = accelSegmentFactory.MakeFromTimeVelocity(2, 3, 0, 0, 7.5, 0.5);
+
+        profile.appendSegment(accelSegment2);
+
+
+        profile.appendSegment(accelSegmentFactory.MakeFromTimeVelocity(3, 5, 0, 0, 10, 0.5));
+
+        var json1=motionProfileFactory.serialize(profile);
+
+
+        var segments1 = profile.getAllBasicSegments();
+
+
+        var segData1=segments1.map(function(seg) {
+            return seg.exportData();
+        });
+
+
+        profile.deleteSegment(accelSegment2.id);
+
+        profile.undo();
+
+        var json2=motionProfileFactory.serialize(profile);
+        var segments2 = profile.getAllBasicSegments();
+
+        expect(json1).toEqual(json2);
+
+
+
+
+        var segData2=segments2.map(function(seg){
+            return seg.exportData();
+        });
+
+        expect(segData1).toEqual(segData2);
+
+    });
+
+
+
 
 });
