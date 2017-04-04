@@ -1403,16 +1403,41 @@ describe('Unit: Profile Exporting', function () {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var accelSegment = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+        var accelSegment = motionProfileFactory.createAccelSegment("time-velocity", 
+        {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0, 
+            vf: 10,
+            jPct: 0.5});
 
         profile.appendSegment(accelSegment);
 
-        var accelSegment2 = accelSegmentFactory.MakeFromTimeVelocity(2, 3, 0, 0, 7.5, 0.5);
+        var accelSegment2 = motionProfileFactory.createAccelSegment("time-velocity", 
+        {
+            t0: 2,
+            tf: 3,
+            p0: 0,
+            v0: 0, 
+            vf: 7.5,
+            jPct: 0.5});
 
+        
         profile.appendSegment(accelSegment2);
 
+        var accelSegment3 = motionProfileFactory.createAccelSegment("time-velocity", 
+        {
+            t0: 3,
+            tf: 5,
+            p0: 0,
+            v0: 0, 
+            vf: 10,
+            jPct: 0.5});
 
-        profile.appendSegment(accelSegmentFactory.MakeFromTimeVelocity(3, 5, 0, 0, 10, 0.5));
+
+
+        profile.appendSegment(accelSegment3);
 
         var json1=motionProfileFactory.serialize(profile);
 
