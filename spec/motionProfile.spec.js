@@ -1417,14 +1417,31 @@ describe('Unit: Profile Exporting', function () {
         var json1=motionProfileFactory.serialize(profile);
 
 
+        var segments1 = profile.getAllBasicSegments();
+
+
+        var segData1=segments1.map(function(seg) {
+            return seg.exportData();
+        });
+
+
         profile.deleteSegment(accelSegment2.id);
 
         profile.undo();
 
         var json2=motionProfileFactory.serialize(profile);
+        var segments2 = profile.getAllBasicSegments();
 
         expect(json1).toEqual(json2);
 
+
+
+
+        var segData2=segments2.map(function(seg){
+            return seg.exportData();
+        });
+
+        expect(segData1).toEqual(segData2);
 
     });
 
