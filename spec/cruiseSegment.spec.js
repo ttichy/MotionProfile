@@ -26,7 +26,8 @@ describe('Unit: cruise/dwell segment testing', function() {
         expect(seg.evaluatePositionAt(0.50)).toBe(0);
     });
 
-    xit('should throw when creating a cruise segment via non-zero distance and starting with v0=0 (t0=0,tf=0.5,p0=0,v0=0,pf=5', function() {
+
+    it('should throw when creating a cruise segment via non-zero distance and starting with v0=0 (t0=0,tf=0.5,p0=0,v0=0,pf=5', function() {
         expect(function() {
             cruiseSegmentFactory.Make(
                 0,
@@ -41,6 +42,7 @@ describe('Unit: cruise/dwell segment testing', function() {
             new Error("Unable to create a cruise/dwell segment with zero initial velocity and non zero distance")
         );
     });
+
 
     // should be able to serialize/deserialze
 });
