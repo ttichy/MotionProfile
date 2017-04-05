@@ -1,6 +1,6 @@
 var CamSegment= require('../lib/segments/camSegment');
 var BasicSegment=require('../lib/segments/basicSegment');
-
+var MotionPoint = require('../lib/profile/motionPoint').MotionPoint;
 
 
 describe('Cubic spline calculations', function () {
@@ -170,7 +170,7 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
 
 
-        camSeg.modifyInitialValues(1,0,2,1);
+        camSeg.modifyInitialValues(new MotionPoint(1,0,0,2,1));
 
         expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
         expect(camSeg.evaluatePositionAt(1.5)).toBe(1.75);
@@ -189,18 +189,18 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluatePositionAt(0.5)).toBe(0.5);
 
 
-        camSeg.modifyInitialValues(1,0,2,1);
+        camSeg.modifyInitialValues(new MotionPoint(1,0,0,2,1));
 
         expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
         expect(camSeg.evaluatePositionAt(1.5)).toBe(1.75);
 
         //initial velocity is 1
-        camSeg.modifyInitialValues(0,0,1,0);
+        camSeg.modifyInitialValues(new MotionPoint(0,0, 0,1,0));
         expect(camSeg.evaluateVelocityAt(0.5)).toBe(1.25);
         expect(camSeg.evaluatePositionAt(0.5)).toBe(0.625);
 
         //initial velocity is 10
-        camSeg.modifyInitialValues(0,0,10,0);
+        camSeg.modifyInitialValues(new MotionPoint(0,0,0,10,0));
         expect(camSeg.evaluateVelocityAt(0.5)).toBe(-1);
         expect(camSeg.evaluatePositionAt(0.5)).toBe(1.75);
 

@@ -392,13 +392,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
-
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(2.5);
-        expect(finalVel).toBe(2.5);
+        expect(finalValues.position).toBe(2.5);
+        expect(finalValues.velocity).toBe(2.5);
     });
 
     it("should be able to modify final time for AccelSegmentTimeDistance segment ", function() {
@@ -431,13 +426,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
-
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(5);
-        expect(finalVel).toBe(10);
+        expect(finalValues.position).toBe(5);
+        expect(finalValues.velocity).toBe(10);
     });
 
     it("should be able to modify final time, final position and jerk for AccelSegmentTimeDistance segment ", function() {
@@ -471,13 +461,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
-
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(1.5);
-        expect(finalVel).toBe(3);
+        expect(finalValues.position).toBe(1.5);
+        expect(finalValues.velocity).toBe(3);
     });
 
     it("should be able to modify final velocity for AccelSegmentTimeVelocity segment ", function() {
@@ -510,13 +495,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
-
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(2.5);
-        expect(finalVel).toBe(2.5);
+        expect(finalValues.position).toBe(2.5);
+        expect(finalValues.velocity).toBe(2.5);
     });
 
     it("should be able to modify final velocity for AccelSegmentTimeVelocity segment using motionProfile function", function() {
@@ -549,13 +529,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
 
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(2.5);
-        expect(finalVel).toBe(2.5);
+        expect(finalValues.position).toBe(2.5);
+        expect(finalValues.velocity).toBe(2.5);
     });
 
     it("should be able to modify final velocity, duration and jerk for AccelSegmentTimeVelocity segment ", function() {
@@ -590,13 +566,8 @@ describe('Unit: motionProfileFactory testing', function() {
 
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
-
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBeCloseTo(1.5, 0.8);
-        expect(finalVel).toBe(2.5);
+        expect(finalValues.position).toBeCloseTo(1.5, 0.8);
+        expect(finalValues.velocity).toBe(2.5);
     });
 
     it('should be able to undo appending a segment ', function() {
@@ -770,23 +741,18 @@ describe('Unit: motionProfileFactory testing', function() {
         // make sure expected final values are still valid
         var finalValues = sameSeg.getFinalValues();
 
-        expect(finalValues.length).toBe(4);
 
-        var finalPos = finalValues[3];
-        var finalVel = finalValues[2];
-
-        expect(finalPos).toBe(2.5);
-        expect(finalVel).toBe(2.5);
+        expect(finalValues.position).toBe(2.5);
+        expect(finalValues.velocity).toBe(2.5);
 
         //undo modify operation
         profile.undo();
 
         sameSeg = profile.getAllSegments()[0];
         finalValues = sameSeg.getFinalValues();
-        finalPos = finalValues[3];
 
         //back to the original
-        expect(finalPos).toBe(5);
+        expect(finalValues.position).toBe(5);
     });
 
 

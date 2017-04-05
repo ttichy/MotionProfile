@@ -1,6 +1,7 @@
 describe('Unit: indexSegmentFactory testing', function() {
 
     var indexSegmentFactory = require('../lib/segments/indexSegment');
+    var MotionPoint = require('../lib/profile/motionPoint').MotionPoint;
 
     it('should create an index segment (t0=1, dt=1(tf=2), p0=0.25, dp=1 (pf = 1.25), v=0.5, velLimPos=null, velLimNeg=null, accJerkPct=0.4, decJerkPct=0.6, xSkew=-0.5, ySkew=0.3, shape=trapezoid, mode=incremental) and correctly evalute position and velocities', function() {
 
@@ -69,9 +70,9 @@ describe('Unit: indexSegmentFactory testing', function() {
     it('should create an index segment, modify initial position and evaluate correctly', function() {
 
         var seg = indexSegmentFactory.Make(0.2, 5, 0.05, 1, 0.5, null, null, 0.3, 0, 0.33, 0.95, 'trapezoid', 'absolute');
-        expect(seg.segmentData.duration).toBe(4.8);;
+        expect(seg.segmentData.duration).toBe(4.8);
 
-        var newSeg = seg.modifyInitialValues(0, 0, -0.2, 0.3);
+        var newSeg = seg.modifyInitialValues(new MotionPoint(0,0, 0, -0.2, 0.3));
 
         var allSegs = seg.getAllSegments();
 

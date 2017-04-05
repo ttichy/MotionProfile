@@ -1,6 +1,7 @@
 describe('Unit: accelSegmentFactory testing', function() {
 
     var accelSegmentFactory = require('../lib/segments/accelSegment');
+    var MotionPoint  = require('../lib/profile/motionPoint').MotionPoint;
 
 
 
@@ -61,7 +62,9 @@ describe('Unit: accelSegmentFactory testing', function() {
 
         var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
 
-        var newSeg = seg.modifyInitialValues(0, 0, 0, 1);
+        
+
+        var newSeg = seg.modifyInitialValues(new MotionPoint(0, 0, 0, 0, 1));
 
 
         var seg1 = newSeg.getAllSegments()[0];
@@ -99,7 +102,7 @@ describe('Unit: accelSegmentFactory testing', function() {
             0.5); // jPct
 
         // t, a, v, p
-        seg.modifyInitialValues(0, 0, 1, 0);
+        seg.modifyInitialValues(new MotionPoint(0,0, 0, 1, 0));
 
         var seg1 = seg.getAllSegments()[0];
         var seg2 = seg.getAllSegments()[1];
@@ -126,7 +129,7 @@ describe('Unit: accelSegmentFactory testing', function() {
 
         var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5, "incremental");
 
-        seg.modifyInitialValues(0, 0, 1, 1);
+        seg.modifyInitialValues(new MotionPoint(0,0,  0, 1, 1));
 
         var seg1 = seg.getAllSegments()[0];
         var seg2 = seg.getAllSegments()[1];
@@ -171,7 +174,7 @@ describe('Unit: accelSegmentFactory testing', function() {
             v0 = 12,
             p0 = 6;
 
-        seg.modifyInitialValues(t0, a0, v0, p0);
+        seg.modifyInitialValues(new MotionPoint(t0,0, a0, v0, p0));
 
         segs = seg.getAllSegments();
 
@@ -245,7 +248,7 @@ describe('Unit: accelSegmentFactory testing', function() {
             v0 = 1,
             p0 = 1;
 
-        seg.modifyInitialValues(t0, a0, v0, p0);
+        seg.modifyInitialValues(new MotionPoint(t0,0, a0, v0, p0));
 
 
         var seg1 = seg.getAllSegments()[0];
@@ -295,7 +298,7 @@ describe('Unit: accelSegmentFactory testing', function() {
             v0 = 12,
             p0 = 6;
 
-        seg.modifyInitialValues(t0, a0, v0, p0);
+        seg.modifyInitialValues(new MotionPoint(t0, 0,a0, v0, p0));
 
         segs = seg.getAllSegments();
 
@@ -345,7 +348,7 @@ describe('Unit: accelSegmentFactory testing', function() {
             v0 = 12,
             p0 = 6;
 
-        seg.modifyInitialValues(t0, a0, v0, p0);
+        seg.modifyInitialValues(new MotionPoint(t0,0, a0, v0, p0));
 
         segs = seg.getAllSegments();
 
