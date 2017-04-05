@@ -239,7 +239,7 @@ describe('Unit: profile serialization testing', function() {
 
 
     it('should serialize and deserialize a profile consisting of only accel, index, and cam segment', function() {
-       var profile = motionProfileFactory.createMotionProfile("rotary");
+        var profile = motionProfileFactory.createMotionProfile("rotary");
 
         profile.setInitialConditions(1, 2);
 
@@ -274,16 +274,16 @@ describe('Unit: profile serialization testing', function() {
             }));
 
         profile.appendSegment(
-            motionProfileFactory.createCamSegment(0,0,0));
+            motionProfileFactory.createCamSegment(0, 0, 0));
 
 
-    var profileJson = motionProfileFactory.serialize(profile);
+        var profileJson = motionProfileFactory.serialize(profile);
 
-    var reconstructedProfile = motionProfileFactory.deserialize(profileJson);
+        var reconstructedProfile = motionProfileFactory.deserialize(profileJson);
 
 
-    expect(reconstructedProfile.evaluatePositionAt(1.1)).toBe(profile.evaluatePositionAt(1.1));
-    expect(reconstructedProfile.evaluatePositionAt(2.1)).toBe(profile.evaluatePositionAt(2.1));
+        expect(reconstructedProfile.evaluatePositionAt(1.1)).toBe(profile.evaluatePositionAt(1.1));
+        expect(reconstructedProfile.evaluatePositionAt(2.1)).toBe(profile.evaluatePositionAt(2.1));
 
 
 
@@ -308,7 +308,7 @@ describe('Unit: profile serialization testing', function() {
 
         profile.appendSegment(seg1);
 
-        var loadSeg = motionProfileFactory.createLoadSegment("INERTIA",0,2,-1,1);
+        var loadSeg = motionProfileFactory.createLoadSegment("INERTIA", 0, 2, -1, 1);
 
         profile.addLoadSegment(loadSeg);
 
@@ -317,7 +317,7 @@ describe('Unit: profile serialization testing', function() {
         var profileJSON = motionProfileFactory.serialize(profile);
 
 
-        var recreatedProfile=motionProfileFactory.deserialize(profileJSON);
+        var recreatedProfile = motionProfileFactory.deserialize(profileJSON);
 
 
         var recLoadSeg = recreatedProfile.getAllLoadSegments("INERTIA")[0];
@@ -332,7 +332,43 @@ describe('Unit: profile serialization testing', function() {
     it('should export an empty profile', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var x= profile.getAllBasicSegments();
+        var x = profile.getAllBasicSegments();
+    });
+
+
+    it('Should export basic segments for an index segment', function() {
+        var profile = motionProfileFactory.createMotionProfile('linear');
+
+        var indexSeg1 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
+                t0: 0,
+                tf: 1.25,
+                p0: 0,
+                pf: 2,
+                v: 12.5,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.2,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'absolute'
+            }));
+
+        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 1.25, 0.02, 0.5);
+        profile.addLoadSegment(loadSeg1);
+
+        var pbs = profile.generateBasicSegments();
+    });
+
+    it('Should export an empty profile', function() {
+        profile = motionProfileFactory.createMotionProfile('rotary');
+        var x = profile.getAllBasicSegments();
+        expect(x.length).toBe(0);
+        var y = profile.generateBasicSegments();
+        expect(y.length).toBe(0);
     });
 
 
