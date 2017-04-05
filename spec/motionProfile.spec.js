@@ -1455,7 +1455,7 @@ describe('Unit: Profile Exporting', function () {
         });
 
 
-        profile.deleteSegment(accelSegment2.id);
+        profile.deleteSegment(accelSegment3.id);
 
         profile.undo();
 
