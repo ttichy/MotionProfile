@@ -106,7 +106,6 @@ describe('Unit: loadSegment testing', function() {
 
   });
 
-
   xit('should only be able to add one load segment per type', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -129,8 +128,6 @@ describe('Unit: loadSegment testing', function() {
     expect(function() {
       profile.addLoadSegment(loadSeg3);
     }).toThrow(new Error("Currently, only one segment per type can be added"));
-
-
 
   });
 

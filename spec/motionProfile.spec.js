@@ -1408,35 +1408,35 @@ describe('Unit: Profile Exporting', function () {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
-        var accelSegment = motionProfileFactory.createAccelSegment("time-velocity", 
+        var accelSegment = motionProfileFactory.createAccelSegment("time-velocity",
         {
             t0: 0,
             tf: 2,
             p0: 0,
-            v0: 0, 
+            v0: 0,
             vf: 10,
             jPct: 0.5});
 
         profile.appendSegment(accelSegment);
 
-        var accelSegment2 = motionProfileFactory.createAccelSegment("time-velocity", 
+        var accelSegment2 = motionProfileFactory.createAccelSegment("time-velocity",
         {
             t0: 2,
             tf: 3,
             p0: 0,
-            v0: 0, 
+            v0: 0,
             vf: 7.5,
             jPct: 0.5});
 
-        
+
         profile.appendSegment(accelSegment2);
 
-        var accelSegment3 = motionProfileFactory.createAccelSegment("time-velocity", 
+        var accelSegment3 = motionProfileFactory.createAccelSegment("time-velocity",
         {
             t0: 3,
             tf: 5,
             p0: 0,
-            v0: 0, 
+            v0: 0,
             vf: 10,
             jPct: 0.5});
 
@@ -1474,8 +1474,4 @@ describe('Unit: Profile Exporting', function () {
         expect(segData1).toEqual(segData2);
 
     });
-
-
-
-
 });
