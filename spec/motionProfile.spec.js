@@ -1,9 +1,40 @@
+
+var fastMath = require('../lib/util/fastMath');
+
+
+var customMatchers = {
+    toBeWithinEpsilon: function(util, customEqualityTesters) {
+        return {
+            compare: function(actual,expected) {
+                var result={};
+
+                result.pass=fastMath.equal(actual,expected);
+
+                if(result.pass)
+                    result.message = "PASSED";
+                else
+                    result.message = "Expected "+actual+" to be within EPSILON of "+expected;
+
+                return result;
+            }
+        };
+    }
+};
+
+
+
 describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var indexSegmentFactory = require('../lib/segments/indexSegment');
-    var fastMath = require('../lib/util/fastMath');
+    
     var ph = require('../lib/profile/profileHelper');
+
+
+    beforeEach(function() {
+        jasmine.addMatchers(customMatchers);
+      });
+
 
     it('should create an empty rotary profile', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -1269,6 +1300,159 @@ it('should be able create a profile with an accel segment, a cruise (time/absolu
 
 
     });
+
+    it('should be able create a profile with three accel segments, last accel segment time-distance/incremental, modify the middle segment and have the last segment correctly recalculate', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 0,
+            tf: 1,
+            p0: 0,
+            v0: 0,
+            pf: 20,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+
+
+        profile.appendSegment(seg1);
+
+        var seg2 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 1,
+            tf: 2,
+            p0: seg1.evaluatePositionAt(seg1.finalTime),
+            v0: seg1.evaluateVelocityAt(seg1.finalTime),
+            pf: 55,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+        profile.appendSegment(seg2);
+
+        var seg3 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 2,
+            tf: 3,
+            p0: seg2.evaluatePositionAt(seg2.finalTime),
+            v0: seg2.evaluateVelocityAt(seg2.finalTime),
+            pf: 70,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+        profile.appendSegment(seg3);
+
+
+
+        expect(profile.evaluatePositionAt(1)).toBe(20);
+        expect(profile.evaluateVelocityAt(1)).toBe(40);
+
+        expect(profile.evaluatePositionAt(2)).toBe(55);
+        expect(profile.evaluateVelocityAt(2)).toBeCloseTo(30,8);
+
+
+
+        profile.modifySegmentValues(seg2.id,{
+            distance: 35
+        }, {
+            position: seg1.getFinalValues().position,
+            velocity: seg1.getFinalValues().velocity
+        });
+
+        var last=profile.getFinalValues();
+
+        expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
+
+        expect(profile.evaluatePositionAt(last.time)).toBeCloseTo(70,8);
+        expect(profile.evaluateVelocityAt(last.time)).toBe(0);
+
+
+    });
+
+
+it('should be able create a profile with three accel segments, last accel segment time-distance/absolute, modify the middle segment and have the last segment correctly recalculate', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 0,
+            tf: 1,
+            p0: 0,
+            v0: 0,
+            pf: 20,
+            jPct: 0.5,
+            mode: "absolute"
+        });
+
+
+
+        profile.appendSegment(seg1);
+
+        var seg2 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 1,
+            tf: 2,
+            p0: seg1.evaluatePositionAt(seg1.finalTime),
+            v0: seg1.evaluateVelocityAt(seg1.finalTime),
+            pf: 55,
+            jPct: 0.5,
+            mode: "absolute"
+        });
+
+        profile.appendSegment(seg2);
+
+        var seg3 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 2,
+            tf: 3,
+            p0: seg2.evaluatePositionAt(seg2.finalTime),
+            v0: seg2.evaluateVelocityAt(seg2.finalTime),
+            pf: 70,
+            jPct: 0.5,
+            mode: "absolute"
+        });
+
+        profile.appendSegment(seg3);
+
+
+
+        expect(profile.evaluatePositionAt(1)).toBe(20);
+        expect(profile.evaluateVelocityAt(1)).toBe(40);
+
+        expect(profile.evaluatePositionAt(2)).toBe(55);
+        expect(profile.evaluateVelocityAt(2)).toBeCloseTo(30,8);
+
+
+
+        profile.modifySegmentValues(seg2.id,{
+            distance: 45
+        }, {
+            position: seg1.getFinalValues().position,
+            velocity: seg1.getFinalValues().velocity
+        });
+
+
+        var basSegs = profile.getAllBasicSegments();
+        basSegs.forEach(function(seg) {
+            var points = seg.chartPoints();
+            points.forEach(function(pt){
+                console.log(pt[0], pt[1], pt[2]);
+            });
+        });
+
+        var last=profile.getFinalValues();
+
+        expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
+
+
+        expect(profile.evaluatePositionAt(2)).toBe(45);
+        expect(profile.evaluateVelocityAt(2)).toBeCloseTo(10,8);
+
+
+        expect(profile.evaluatePositionAt(last.time)).toBeCloseTo(70,8);
+        expect(profile.evaluateVelocityAt(last.time)).toBe(40);
+
+
+    });    
 
 
     it('should create a profile with only a cam segment', function() {
