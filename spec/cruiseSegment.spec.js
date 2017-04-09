@@ -1,5 +1,6 @@
 describe('Unit: cruise/dwell segment testing', function() {
     var cruiseSegmentFactory = require('../lib/segments/cruiseDwellSegment');
+    var BasicMotionSegmentFactory = require('../lib/segments/basicSegment');
 
     xit('should create an cruise dwell segment with via distance (t0=0,tf=0.5,p0=0,v0=50,pf=25) and correctly evalute position and velocities', function() {
         // Make(t0, tf, p0, v, pf, permutation, mode, loads){
@@ -24,6 +25,15 @@ describe('Unit: cruise/dwell segment testing', function() {
         expect(seg.evaluatePositionAt(0.25)).toBe(0);
         expect(seg.evaluateVelocityAt(0.25)).toBe(0);
         expect(seg.evaluatePositionAt(0.50)).toBe(0);
+    });
+
+    it('should create a cruise segment via zero distance and starting with v0=0 (t0=0,tf=2,p0=0,v0=0,pf=0', function() {
+        var seg = cruiseSegmentFactory.Make(0, 0.5, 0, 0, 0, 'time', 'incremental');
+
+        var allBasicSegments=seg.getAllSegments();
+        allBasicSegments.every(function(seg){
+            expect(seg instanceof BasicMotionSegmentFactory.BasicMotionSegment).toBe(true);
+        });
     });
 
 

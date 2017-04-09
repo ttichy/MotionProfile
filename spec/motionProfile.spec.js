@@ -27,6 +27,7 @@ describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var indexSegmentFactory = require('../lib/segments/indexSegment');
+    var BasicMotionSegmentFactory=require('../lib/segments/basicSegment');
     
     var ph = require('../lib/profile/profileHelper');
 
@@ -1250,7 +1251,39 @@ it('should be able create a profile with three segments, delete one, undo and ge
 
 
     });
-it('should be able create a profile with an accel segment, a cruise (time/absolute) segment and then modify the accel segment', function() {
+
+    it('should be able create a profile with a single cruise segment and getAllBasicSegments on it', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var cruise = {};
+        cruise.t0=2;
+        cruise.tf=2.25;
+        cruise.p0=20;
+        cruise.v0=20;
+        cruise.pf=25;
+        cruise.permutation='distance';
+        cruise.mode='absolute';
+
+
+        var seg1 = motionProfileFactory.createCruiseDwellSegment(cruise);
+
+
+        profile.appendSegment(seg1);
+
+
+        var basicSegments=profile.getAllBasicSegments();
+
+        basicSegments.forEach(function(seg){
+            expect(seg instanceof BasicMotionSegmentFactory.BasicMotionSegment).toBe(true);
+        });
+
+
+    });
+
+
+
+    it('should be able create a profile with an accel segment, a cruise (time/absolute) segment and then modify the accel segment', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
