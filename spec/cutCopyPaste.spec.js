@@ -121,4 +121,50 @@ describe('Unit: cuty, copy, and paste testing', function() {
         expect(profile.evaluatePositionAt(18)).toBeCloseTo(12.96672, 4);
         expect(profile.getAllSegments()[2].id).toBe(indexSeg.id);
     });
+
+    it('should allow user to copy once and paste segments indefinitely', function () {
+        var profile = motionProfileFactory.createMotionProfile('rotary');
+
+        //segment.t0, segment.tf, segment.p0, segment.v0, segment.vf, segment.jPct, segment.mode, loads
+        var accelSeg = profile.appendSegment(
+            motionProfileFactory.createAccelSegment('time-velocity', {
+                t0: 0,
+                tf: 3.5,
+                p0: profile.initialPosition,
+                v0: profile.initialVelocity,
+                vf: 2.98,
+                jPct: 0.2,
+                mode: 'absolute'
+            })
+        ); // basic segments = 3
+
+        var indexSeg = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: accelSeg.finalTime,
+                tf: 6.2,
+                p0: profile.evaluatePositionAt(accelSeg.finalTime),
+                pf: 1,
+                v: profile.evaluateVelocityAt(accelSeg.finalTime),
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.5,
+                decJerk: 1,
+                xSkew: null,
+                ySkew: null,
+                shape: 'triangle',
+                mode: 'incremental'
+            })
+        ); // basic segments = 5
+
+        profile.copySegment(indexSeg.id);
+        for (i = 0; i < 60; i++) {
+            profile.pasteSegment(indexSeg.id);
+        }
+        expect(profile.getAllBasicSegments().length).toBe(5+3+60*5);
+        for (i = 0; i < 60; i++) {
+            profile.undo();
+        }
+        expect(profile.getAllBasicSegments().length).toBe(8);
+
+    })
 });
