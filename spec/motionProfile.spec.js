@@ -27,7 +27,7 @@ describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var indexSegmentFactory = require('../lib/segments/indexSegment');
-    
+
     var ph = require('../lib/profile/profileHelper');
 
 
@@ -414,11 +414,8 @@ describe('Unit: motionProfileFactory testing', function() {
         //we should get back the same segment that we just created
         expect(sameSeg).toBe(seg1);
 
-        sameSeg.modifySegmentValues({
+        profile.modifySegmentValues(sameSeg.id, {
             distance: 2.5
-        }, {
-            position: 0,
-            velocity: 0
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -448,11 +445,8 @@ describe('Unit: motionProfileFactory testing', function() {
         //we should get back the same segment that we just created
         expect(sameSeg).toBe(seg1);
 
-        sameSeg.modifySegmentValues({
+        profile.modifySegmentValues(sameSeg.id, {
             duration: 1
-        }, {
-            position: 0,
-            velocity: 0
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -481,19 +475,67 @@ describe('Unit: motionProfileFactory testing', function() {
         //we should get back the same segment that we just created
         expect(sameSeg).toBe(seg1);
 
-        sameSeg.modifySegmentValues({
+        profile.modifySegmentValues(sameSeg.id, {
             duration: 1,
             distance: 1.5,
             jerkPercent: 0.25
-        }, {
-            position: 0,
-            velocity: 0
         });
 
         var finalValues = sameSeg.getFinalValues();
 
         expect(finalValues.position).toBe(1.5);
         expect(finalValues.velocity).toBe(3);
+    });
+
+    it("should be able to convert an AccelSegmentTimeDistance segment in to an AccelSegmentTimeVelocity segment", function() {
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
+            t0: 0,
+            tf: 2,
+            p0: 0,
+            v0: 0,
+            pf: 5,
+            jPct: 0.5,
+            mode: "incremental"
+        });
+
+        var seg1Id = seg1.id;
+
+        profile.appendSegment(seg1);
+
+        var sameSeg = profile.getAllSegments()[0];
+
+        //we should get back the same segment that we just created
+        expect(sameSeg).toBe(seg1);
+
+        profile.modifySegmentValues(sameSeg.id, {
+            dataPermutation: 'time-velocity'
+        });
+
+        var sameSegAgain = profile.getAllSegments()[0];
+        var finalValues = sameSegAgain.getFinalValues();
+
+        expect(finalValues.position).toBe(5);
+        expect(finalValues.velocity).toBe(5);
+
+        // preserve id
+        expect(sameSegAgain.id).toBe(seg1Id);
+        expect(sameSegAgain.segmentData.dataPermutation).toBe('time-velocity');
+
+        profile.modifySegmentValues(seg1Id, {
+            mode:'absolute',
+            finalTime: 5
+        });
+
+        expect(sameSegAgain.id).toBe(seg1Id);
+        expect(sameSegAgain.segmentData.dataPermutation).toBe('time-velocity');
+
+        expect(profile.getAllSegments()[0].finalTime).toBe(5);
+        expect(profile.getAllSegments()[0].segmentData.finalTime).toBe(5);
+        expect(profile.getAllSegments()[0].segmentData.finalTime).toBe(sameSegAgain.finalTime);
+
+        expect(profile.evaluatePositionAt(sameSegAgain.finalTime)).toBeCloseTo(12.5);
     });
 
     it("should be able to modify final velocity for AccelSegmentTimeVelocity segment ", function() {
@@ -517,11 +559,8 @@ describe('Unit: motionProfileFactory testing', function() {
         //we should get back the same segment that we just created
         expect(sameSeg).toBe(seg1);
 
-        sameSeg.modifySegmentValues({
-            finalVelocity: 2.5
-        }, {
-            position: 0,
-            velocity: 0
+        profile.modifySegmentValues(sameSeg.id, {
+            acceleration: 2.5
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -552,14 +591,10 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(sameSeg).toBe(seg1);
 
         profile.modifySegmentValues(seg1.id, {
-            finalVelocity: 2.5
-        }, {
-            position: 0,
-            velocity: 0
+            acceleration: 2.5
         });
 
         var finalValues = sameSeg.getFinalValues();
-
 
         expect(finalValues.position).toBe(2.5);
         expect(finalValues.velocity).toBe(2.5);
@@ -586,13 +621,10 @@ describe('Unit: motionProfileFactory testing', function() {
         //we should get back the same segment that we just created
         expect(sameSeg).toBe(seg1);
 
-        sameSeg.modifySegmentValues({
-            finalVelocity: 2.5,
+        profile.modifySegmentValues(sameSeg.id,{
+            acceleration: 2.5,
             duration: 1.2,
             jerkPercent: 0.25
-        }, {
-            position: 0,
-            velocity: 0
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -1142,10 +1174,7 @@ it('should be able create a profile with three segments, delete one, undo and ge
 
 
         profile.modifySegmentValues(seg1.id,{
-            finalVelocity: 2.5
-        }, {
-            position: 0,
-            velocity: 0
+            acceleration: 2.5
         });
 
         expect(profile.evaluatePositionAt(2.5)).toBe(3.75);
@@ -1413,23 +1442,15 @@ it('should be able create a profile with three accel segments, last accel segmen
 
         profile.appendSegment(seg3);
 
-
-
         expect(profile.evaluatePositionAt(1)).toBe(20);
         expect(profile.evaluateVelocityAt(1)).toBe(40);
 
         expect(profile.evaluatePositionAt(2)).toBe(55);
         expect(profile.evaluateVelocityAt(2)).toBeCloseTo(30,8);
 
-
-
         profile.modifySegmentValues(seg2.id,{
-            distance: 45
-        }, {
-            position: seg1.getFinalValues().position,
-            velocity: seg1.getFinalValues().velocity
+            finalPosition: 45,
         });
-
 
         var basSegs = profile.getAllBasicSegments();
         basSegs.forEach(function(seg) {
@@ -1439,7 +1460,7 @@ it('should be able create a profile with three accel segments, last accel segmen
             });
         });
 
-        var last=profile.getFinalValues();
+        var last = profile.getFinalValues();
 
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
 
@@ -1452,7 +1473,7 @@ it('should be able create a profile with three accel segments, last accel segmen
         expect(profile.evaluateVelocityAt(last.time)).toBe(40);
 
 
-    });    
+    });
 
 
     it('should create a profile with only a cam segment', function() {
@@ -1617,7 +1638,7 @@ it('should be able create a profile with three accel segments, last accel segmen
         expect(profile.evaluatePositionAt(2.5)).toBe(11.75);
 
         expect(profile.evaluateVelocityAt(3.5)).toBe(1.5);
-    });    
+    });
 
 
 });
