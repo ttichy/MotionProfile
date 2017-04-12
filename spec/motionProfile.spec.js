@@ -1239,17 +1239,17 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(seg1);
 
-        var cruise = {};
-        cruise.t0=2;
-        cruise.tf=2.25;
-        cruise.p0=20;
-        cruise.v0=20;
-        cruise.pf=25;
-        cruise.permutation='distance';
-        cruise.mode='absolute';
+        var seg2 = motionProfileFactory.createCruiseDwellSegment({
+            t0: 2,
+            tf: 2.25,
+            p0: 20,
+            v0: 20,
+            pf: 25,
+            permutation: 'distance',
+            mode: 'absolute'
+        });
 
-
-        var seg2 = motionProfileFactory.createCruiseDwellSegment(cruise);
+        console.log(profile.segments.lastSegment().getFinalValues());
 
         profile.appendSegment(seg2);
 
@@ -1258,12 +1258,9 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.modifySegmentValues(seg1.id,{
             distance: 24
-        }, {
-            position: 0,
-            velocity: 0
         });
 
-        var last=profile.getFinalValues();
+        var last = profile.getFinalValues();
 
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
 
@@ -1321,17 +1318,15 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.appendSegment(seg1);
 
-        var cruise = {};
-        cruise.t0=2;
-        cruise.tf=2.5;
-        cruise.p0=20;
-        cruise.v0=20;
-        cruise.pf=25;
-        cruise.permutation='time';
-        cruise.mode='absolute';
-
-
-        var seg2 = motionProfileFactory.createCruiseDwellSegment(cruise);
+        var seg2 = motionProfileFactory.createCruiseDwellSegment({
+            t0: 2,
+            tf: 2.5,
+            p0: 20,
+            v0: 20,
+            pf: 25,
+            permutation: 'time',
+            mode: 'absolute'
+        });
 
         profile.appendSegment(seg2);
 
@@ -1480,7 +1475,7 @@ it('should be able create a profile with three accel segments, last accel segmen
         basSegs.forEach(function(seg) {
             var points = seg.chartPoints();
             points.forEach(function(pt){
-                console.log(pt[0], pt[1], pt[2]);
+                // console.log(pt[0], pt[1], pt[2]);
             });
         });
 
