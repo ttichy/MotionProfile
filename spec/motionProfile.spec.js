@@ -991,7 +991,7 @@ describe('Unit: motionProfileFactory testing', function() {
         // expect(accSeg2.evaluateVelocityAt(8.8)).toBeCloseTo(-21.0651, 4);
     });
 
-    it('should clear the profile, leaving no segments', function() {
+    it('should clear the profile, leaving no segments, then undo the clear', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -1013,10 +1013,13 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.clear();
         expect(profile.getAllSegments().length).toBe(0);
+
+        profile.undo();
+        expect(profile.getAllSegments().length).toBe(3);
     });
 
 
-it('should be able create a profile with three segments, delete one, undo and get back to the original profile', function() {
+    it('should be able create a profile with three segments, delete one, undo and get back to the original profile', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -1040,7 +1043,6 @@ it('should be able create a profile with three segments, delete one, undo and ge
             jPct: 0.5
         });
 
-
         profile.appendSegment(accelSegment2);
 
         var accelSegment3 = motionProfileFactory.createAccelSegment("time-velocity", {
@@ -1052,23 +1054,15 @@ it('should be able create a profile with three segments, delete one, undo and ge
             jPct: 0.5
         });
 
-
-
         profile.appendSegment(accelSegment3);
 
         var json1 = motionProfileFactory.serialize(profile);
-
-
         var segments1 = profile.getAllBasicSegments();
-
-
         var segData1 = segments1.map(function(seg) {
             return seg.exportData();
         });
 
-
         profile.deleteSegment(accelSegment3.id);
-
         profile.undo();
 
         var json2 = motionProfileFactory.serialize(profile);
@@ -1076,14 +1070,11 @@ it('should be able create a profile with three segments, delete one, undo and ge
 
         expect(json1).toEqual(json2);
 
-
-
         var segData2 = segments2.map(function(seg) {
             return seg.exportData();
         });
 
         expect(segData1).toEqual(segData2);
-
     });
 
     it('should be able to modify segment values for a segment in the middle of the profile', function() {
