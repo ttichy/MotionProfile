@@ -1,3 +1,4 @@
+var MotionPoint = require('../lib/profile/motionPoint').MotionPoint;
 describe('Unit: cruise/dwell segment testing', function() {
     var cruiseSegmentFactory = require('../lib/segments/cruiseDwellSegment');
     var BasicMotionSegmentFactory = require('../lib/segments/basicSegment');
@@ -36,7 +37,6 @@ describe('Unit: cruise/dwell segment testing', function() {
         });
     });
 
-
     it('should throw when creating a cruise segment via non-zero distance and starting with v0=0 (t0=0,tf=0.5,p0=0,v0=0,pf=5', function() {
         expect(function() {
             cruiseSegmentFactory.Make(
@@ -51,6 +51,13 @@ describe('Unit: cruise/dwell segment testing', function() {
         }).toThrow(
             new Error("Unable to create a cruise/dwell segment with zero initial velocity and non zero distance")
         );
+    });
+
+    it('Should be able to change cruise/dwell permutation using modifySegmentValues', function () {
+        var seg = cruiseSegmentFactory.Make(0, 2, 0, 30, 60, 'distance', 'absolute');
+        seg.modifySegmentValues({
+            permutation: 'time'
+        }, new MotionPoint(0, 0, 0, 30, 0));
     });
 
 
