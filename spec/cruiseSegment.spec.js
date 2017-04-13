@@ -55,11 +55,31 @@ describe('Unit: cruise/dwell segment testing', function() {
 
     it('Should be able to change cruise/dwell permutation using modifySegmentValues', function () {
         var seg = cruiseSegmentFactory.Make(0, 2, 0, 30, 60, 'distance', 'absolute');
-        seg.modifySegmentValues({
-            permutation: 'time'
-        }, new MotionPoint(0, 0, 0, 30, 0));
-    });
 
+        expect(seg.finalTime).toBe(2);
+        expect(seg.segmentData.distance).toBe(60);
+        expect(seg.segmentData.duration).toBe(2);
+        expect(seg.segmentData.permutation).toBe('distance');
+
+        seg.modifySegmentValues({
+            permutation: 'time',
+        }, new MotionPoint(0, 0, 0, 30, 0));
+
+        expect(seg.finalTime).toBe(2);
+        expect(seg.segmentData.distance).toBe(60);
+        expect(seg.segmentData.duration).toBe(2);
+        expect(seg.segmentData.permutation).toBe('time');
+
+        seg.modifySegmentValues({
+            permutation: 'distance',
+            finalPosition: 40
+        }, new MotionPoint(0, 0, 0, 30, 0));
+
+        expect(seg.finalTime).toBe(40/30);
+        expect(seg.segmentData.distance).toBe(40);
+        expect(seg.segmentData.duration).toBe(40/30);
+        expect(seg.segmentData.permutation).toBe('distance');
+    });
 
     // should be able to serialize/deserialze
 });
