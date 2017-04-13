@@ -1235,8 +1235,6 @@ describe('Unit: motionProfileFactory testing', function() {
             mode: "incremental"
         });
 
-
-
         profile.appendSegment(seg1);
 
         var seg2 = motionProfileFactory.createCruiseDwellSegment({
@@ -1249,24 +1247,22 @@ describe('Unit: motionProfileFactory testing', function() {
             mode: 'absolute'
         });
 
-        console.log(profile.segments.lastSegment().getFinalValues());
+        // console.log(profile.segments.lastSegment().getFinalValues());
 
         profile.appendSegment(seg2);
 
         expect(profile.evaluatePositionAt(2.25)).toBe(25);
-
 
         profile.modifySegmentValues(seg1.id,{
             distance: 24
         });
 
         var last = profile.getFinalValues();
+        expect(last.time).toBeCloseTo(2.041666666, 8);
 
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
 
         expect(profile.evaluatePositionAt(last.time)).toBeCloseTo(25,8);
-
-
     });
 
     it('should be able create a profile with a single cruise segment and getAllBasicSegments on it', function() {
