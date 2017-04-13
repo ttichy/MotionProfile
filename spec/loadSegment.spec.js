@@ -33,7 +33,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     expect(loadSeg1.evaluateLoadAt(0)).toBe(1);
     expect(loadSeg1.evaluateLoadAt(2)).toBe(1);
@@ -45,7 +45,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
@@ -64,7 +64,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
@@ -87,7 +87,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
@@ -111,18 +111,18 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
-    var loadSeg2 = profile.createLoadSegment("INERTIA", 2, 3, 1, 2);
+    var loadSeg2 = motionProfileFactory.createLoadSegment("INERTIA", 2, 3, 1, 2);
 
     profile.addLoadSegment(loadSeg2);
 
     var loadSegs = profile.getAllLoadSegments("INERTIA");
     expect(loadSegs.length).toBe(1);
 
-    var loadSeg3 = profile.createLoadSegment("FRICTION", 3, 4, 1, 1);
+    var loadSeg3 = motionProfileFactory.createLoadSegment("FRICTION", 3, 4, 1, 1);
 
 
 
@@ -139,18 +139,18 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
-    var loadSeg2 = profile.createLoadSegment("INERTIA", 2, 3, 1, 2);
+    var loadSeg2 = motionProfileFactory.createLoadSegment("INERTIA", 2, 3, 1, 2);
 
     profile.addLoadSegment(loadSeg2);
 
     var loadSegs = profile.getAllLoadSegments("INERTIA");
     expect(loadSegs.length).toBe(1);
 
-    var loadSeg3 = profile.createLoadSegment("FRICTION", 3, 4, 1, 1);
+    var loadSeg3 = motionProfileFactory.createLoadSegment("FRICTION", 3, 4, 1, 1);
 
     profile.addLoadSegment(loadSeg3);
 
@@ -159,7 +159,7 @@ describe('Unit: loadSegment testing', function() {
     expect(loadSegs[1]).toBe(loadSeg3);
 
     // now insert a segment between the existing 2
-    var loadSeg4 = profile.createLoadSegment("FRICTION", 2, 3, 1, 1);
+    var loadSeg4 = motionProfileFactory.createLoadSegment("FRICTION", 2, 3, 1, 1);
     profile.addLoadSegment(loadSeg4);
 
     loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -174,10 +174,10 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 1, 2, 1, 1);
-    var loadSeg2 = profile.createLoadSegment("FRICTION", 1.2, 1.8, 1);
-    var loadSeg3 = profile.createLoadSegment("FRICTION", 0, 1.1, 1);
-    var loadSeg4 = profile.createLoadSegment("FRICTION", 0, 3, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 1, 2, 1, 1);
+    var loadSeg2 = motionProfileFactory.createLoadSegment("FRICTION", 1.2, 1.8, 1);
+    var loadSeg3 = motionProfileFactory.createLoadSegment("FRICTION", 0, 1.1, 1);
+    var loadSeg4 = motionProfileFactory.createLoadSegment("FRICTION", 0, 3, 1);
 
 
     profile.addLoadSegment(loadSeg1);
@@ -201,7 +201,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
 
@@ -210,7 +210,7 @@ describe('Unit: loadSegment testing', function() {
     //should be able to get the same segment back
     expect(loadSegs[0]).toBe(loadSeg1);
 
-    var changedSegment = profile.createLoadSegment("FRICTION", 0, 2, 2, 2);
+    var changedSegment = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 2, 2);
     profile.modifyLoadSegment(loadSeg1.id, changedSegment);
 
     loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -224,7 +224,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
     var loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -253,7 +253,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
     var loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -280,7 +280,7 @@ describe('Unit: loadSegment testing', function() {
 
     var profile = motionProfileFactory.createMotionProfile("rotary");
 
-    var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+    var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
     profile.addLoadSegment(loadSeg1);
     var loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -289,7 +289,7 @@ describe('Unit: loadSegment testing', function() {
     expect(loadSegs[0]).toBe(loadSeg1);
 
 
-    var changedSegment = profile.createLoadSegment("FRICTION", 0, 2, 2, 2);
+    var changedSegment = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 2, 2);
     profile.modifyLoadSegment(loadSeg1.id, changedSegment);
     expect(profile.getAllLoadSegments("FRICTION")[0]).toBe(changedSegment);
 

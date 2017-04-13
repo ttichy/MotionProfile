@@ -5,7 +5,7 @@ describe('Unit: Profile Exporting', function() {
     var fastMath = require('../lib/util/fastMath');
 
 
-    
+
     it('Should correctly generate basic segments for an index segment and an accel segment and match the basic segments from V1', function() {
         var profile = motionProfileFactory.createMotionProfile('linear');
 
@@ -47,7 +47,7 @@ describe('Unit: Profile Exporting', function() {
             })
         );
 
-        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 4.55, 0.02, 0.13);
+        var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION_COEFF", 0, 4.55, 0.02, 0.13);
         profile.addLoadSegment(loadSeg1);
 
         var pbs = profile.generateBasicSegments();

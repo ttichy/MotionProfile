@@ -75,7 +75,7 @@ describe('Unit: profile serialization testing', function() {
         profile.appendSegment(seg2);
 
 
-        var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+        var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
         profile.addLoadSegment(loadSeg1);
 
@@ -114,7 +114,7 @@ describe('Unit: profile serialization testing', function() {
         profile.appendSegment(seg2);
 
 
-        var loadSeg1 = profile.createLoadSegment("FRICTION", 0, 2, 1, 1);
+        var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
 
         profile.addLoadSegment(loadSeg1);
 
@@ -184,7 +184,7 @@ describe('Unit: profile serialization testing', function() {
             }));
 
         // type, t0, tf, initialLoad, finalLoad
-        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
+        var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION_COEFF", 0, 2, 0.02, 0.02);
         profile.addLoadSegment(loadSeg1);
 
         // console.dir(profile.getAllSegments());
@@ -357,7 +357,7 @@ describe('Unit: profile serialization testing', function() {
                 mode: 'absolute'
             }));
 
-        var loadSeg1 = profile.createLoadSegment("FRICTION_COEFF", 0, 1.25, 0.02, 0.5);
+        var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION_COEFF", 0, 1.25, 0.02, 0.5);
         profile.addLoadSegment(loadSeg1);
 
         var pbs = profile.generateBasicSegments();
