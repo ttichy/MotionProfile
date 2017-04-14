@@ -105,9 +105,9 @@ MotionProfile.prototype.setInitialConditions = function(position, velocity, load
 	this.initialPosition = position;
 	this.initialVelocity = velocity;
 
-	this.initialThrust = thrust;
-	this.initialLoad = load;
-	this.initialFriction = friction;
+	this.initialThrust = thrust || 0;
+	this.initialLoad = load || 0;
+	this.initialFriction = friction || 0;
 
 
 	//after setting initial conditions, all subsequent modules must be recalculated
@@ -261,10 +261,16 @@ MotionProfile.prototype.appendSegment = function(segment, skipUndo) {
 
 	// even though we append at the end, still have to make sure that initial/final conditions are satisfied
 	var lastSegment = this.segments.lastSegment();
-	if (lastSegment) {
-		var lastValues = lastSegment.getFinalValues();
-		segment.modifyInitialValues(lastValues);
+	var lastPoint;
+
+	if (!lastSegment) {
+		lastPoint = new MotionPoint(0, 0,0, this.initialVelocity, this.initialPosition);
+	} else {
+		lastPoint = lastSegment.getFinalValues();
 	}
+
+	segment.modifyInitialValues(lastPoint);
+
 
 	this.segments.insertAt(segment, null);
 
@@ -724,7 +730,7 @@ MotionProfile.prototype.copySegment = function (segmentId) {
 	var segment = this.findById(segmentId);
 
 	if (segment.type == 'cam' && segment.segmentData.master.length >= 1000) {
-		throw new Error('You are not allowed to copy/paste cam segments with more than 1000 points')
+		throw new Error('You are not allowed to copy/paste cam segments with more than 1000 points');
 	} else {
 		var oldClipboard = this.clipboard;
 		this.clipboard = segment.duplicate();
@@ -1128,6 +1134,10 @@ CruiseDwellMotionSegment.prototype.modifyInitialValues = function(startPoint) {
 		}
 
 		this.segmentData.initialTime = t0;
+
+		if(FastMath.gt(this.segmentData.distance,0) && FastMath.equal(this.segmentData.velocity,0))
+			throw new Error("Cannot modify cruise/dwell segment because of non-zero distance and zero velocity");
+
 		this.segmentData.duration = this.segmentData.distance/this.segmentData.velocity;
 		this.segmentData.finalTime = this.segmentData.initialTime + this.segmentData.duration;
 		if (FastMath.leq(this.segmentData.duration, 0)) {
@@ -2362,6 +2372,8 @@ CamMotionSegment.prototype.modifySegmentValues = function(newSegmentData) {
     var basicSegments = this.calculateBasicSegments(this.segmentData);
 
     this.segments.initializeWithSegments(basicSegments);
+
+    return this;
 };
 
 
