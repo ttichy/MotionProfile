@@ -205,8 +205,8 @@ it('should correctly add accel segment to empty profile with non-zero initial co
 
         expect(profile.evaluatePositionAt(2)).toBe(15);
         expect(profile.evaluateVelocityAt(2)).toBe(12);
-        
-    });    
+
+    });
 
     it('should correctly find existing segments with exact matches', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -866,7 +866,7 @@ it('should correctly add accel segment to empty profile with non-zero initial co
         expect(indexSeg).toBe(sameSeg2);
     });
 
-    xit('should be able to add a cruise/dwell after an index segment', function () {
+    it('should be able to add a cruise/dwell after an index segment', function () {
         profile = motionProfileFactory.createMotionProfile('rotary');
 
         profile.setInitialConditions(0, 1, 0, 0, 0);
