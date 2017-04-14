@@ -141,6 +141,8 @@ describe('Unit: profile serialization testing', function() {
     it('should be able to serialize and deserialize profile with only index segments', function() {
         var profile = motionProfileFactory.createMotionProfile("linear");
 
+        profile.setInitialConditions(0,12.5, 0, 0, 0);
+
         var indexSeg1 = profile.appendSegment(
             motionProfileFactory.createIndexSegment({
                 //(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode) {
