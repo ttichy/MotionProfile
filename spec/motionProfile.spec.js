@@ -1,7 +1,6 @@
 
 var fastMath = require('../lib/util/fastMath');
 
-
 var customMatchers = {
     toBeWithinEpsilon: function(util, customEqualityTesters) {
         return {
@@ -20,8 +19,6 @@ var customMatchers = {
         };
     }
 };
-
-
 
 describe('Unit: motionProfileFactory testing', function() {
     var motionProfileFactory = require('../lib/profile/motionProfile');
@@ -851,6 +848,40 @@ describe('Unit: motionProfileFactory testing', function() {
         var sameSeg2 = profile.getAllSegments()[0];
 
         expect(indexSeg).toBe(sameSeg2);
+    });
+
+    xit('should be able to add a cruise/dwell after an index segment', function () {
+        profile = motionProfileFactory.createMotionProfile('rotary');
+
+        profile.setInitialConditions(0, 1, 0, 0, 0);
+
+        profile.appendSegment(motionProfileFactory.createIndexSegment({
+            t0: 0,
+            tf: 3.7,
+            p0: 0,
+            pf: 8,
+            v: 0,
+            velLimPos: null,
+            velLimNeg: null,
+            accJerk: 0.7,
+            decJerk: 0.4,
+            xSkew: null,
+            ySkew: null,
+            shape: 'trapezoid',
+            mode: 'absolute'
+        }));
+
+        profile.appendSegment(motionProfileFactory.createCruiseDwellSegment({
+            t0: 0,
+            tf: 0.5,
+            p0: 0,
+            v0: 1,
+            pf: 600,
+            permutation: 'time',
+            mode: 'incremental',
+        }));
+
+        expect(profile.evaluateVelocityAt(0)).toBe(1);
     });
 
     it('should be able to insert an accel segment before an index segment', function() {
