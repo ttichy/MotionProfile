@@ -192,6 +192,22 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(ph.validateBasicSegments(profile.getAllBasicSegments())).toBe(true);
     });
 
+
+it('should correctly add accel segment to empty profile with non-zero initial conditions', function() {
+
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        profile.setInitialConditions(1,2);
+
+        var seg1 = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        profile.appendSegment(seg1);
+
+        expect(profile.evaluatePositionAt(2)).toBe(15);
+        expect(profile.evaluateVelocityAt(2)).toBe(12);
+        
+    });    
+
     it('should correctly find existing segments with exact matches', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -1296,7 +1312,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluatePositionAt(last.time)).toBeCloseTo(25,8);
     });
 
-    it('should be able create a profile with a single cruise segment and getAllBasicSegments on it', function() {
+    it('should throw when adding a distance cruise/dwell segment to a profile with initial velocity of zero', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -1313,15 +1329,9 @@ describe('Unit: motionProfileFactory testing', function() {
         var seg1 = motionProfileFactory.createCruiseDwellSegment(cruise);
 
 
-        profile.appendSegment(seg1);
-
-
-        var basicSegments=profile.getAllBasicSegments();
-
-        basicSegments.forEach(function(seg){
-            expect(seg instanceof BasicMotionSegmentFactory.BasicMotionSegment).toBe(true);
-        });
-
+        expect(function() {
+          profile.appendSegment(seg1);
+        }).toThrowError("Cannot modify cruise/dwell segment because of non-zero distance and zero velocity");
 
     });
 
