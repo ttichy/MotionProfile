@@ -66,6 +66,27 @@ describe('myApp.version module', function() {
 
     });
 
+
+    it('should be able to solve a tridiagonal matrix system', function() {
+
+      var a=[4,3];
+      var b=[9, -7, 8];
+      var c=[1, 2];
+
+      //expected result
+      var d=[5, 6, 2];
+
+
+
+      var result=fm.solveTridiagonalMatrix(a,b,c,d);
+
+      result.forEach(function(item,i){
+        expect(fm.equal(item,d[i]));
+      });
+
+
+    });
+
   });
 
 });
