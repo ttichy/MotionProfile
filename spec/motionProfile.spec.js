@@ -865,7 +865,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(indexSeg).toBe(sameSeg2);
     });
 
-    xit('should be able to add a cruise/dwell after an index segment', function () {
+    it('should be able to add a cruise/dwell after an index segment', function () {
         profile = motionProfileFactory.createMotionProfile('rotary');
 
         profile.setInitialConditions(0, 1, 0, 0, 0);
@@ -893,7 +893,7 @@ describe('Unit: motionProfileFactory testing', function() {
             v0: 1,
             pf: 600,
             permutation: 'time',
-            mode: 'incremental',
+            mode: 'incremental'
         }));
 
         expect(profile.evaluateVelocityAt(0)).toBe(1);
