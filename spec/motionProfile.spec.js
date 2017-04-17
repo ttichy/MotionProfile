@@ -1,4 +1,3 @@
-
 var fastMath = require('../lib/util/fastMath');
 
 var customMatchers = {
@@ -193,7 +192,7 @@ describe('Unit: motionProfileFactory testing', function() {
     });
 
 
-it('should correctly add accel segment to empty profile with non-zero initial conditions', function() {
+    it('should correctly add accel segment to empty profile with non-zero initial conditions', function() {
 
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
@@ -205,8 +204,8 @@ it('should correctly add accel segment to empty profile with non-zero initial co
 
         expect(profile.evaluatePositionAt(2)).toBe(15);
         expect(profile.evaluateVelocityAt(2)).toBe(12);
-        
-    });    
+
+    });
 
     it('should correctly find existing segments with exact matches', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
@@ -1456,8 +1455,7 @@ it('should correctly add accel segment to empty profile with non-zero initial co
     });
 
 
-it('should be able create a profile with three accel segments, last accel segment time-distance/absolute, modify the middle segment and have the last segment correctly recalculate', function() {
-
+    it('should be able create a profile with three accel segments, last accel segment time-distance/absolute, modify the middle segment and have the last segment correctly recalculate', function() {
         var profile = motionProfileFactory.createMotionProfile("rotary");
 
         var seg1 = motionProfileFactory.createAccelSegment("time-distance", {
@@ -1469,8 +1467,6 @@ it('should be able create a profile with three accel segments, last accel segmen
             jPct: 0.5,
             mode: "absolute"
         });
-
-
 
         profile.appendSegment(seg1);
 
@@ -1697,6 +1693,137 @@ it('should be able create a profile with three accel segments, last accel segmen
     });
 
 
+    it('should create a profile with segments, modify initial conditions, and recalculate the profile', function () {
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var seg1 = profile.appendSegment(
+            motionProfileFactory.createAccelSegment("time-distance", {
+                t0: 0,
+                tf: 1,
+                p0: 0,
+                v0: 0,
+                pf: 20,
+                jPct: 0.5,
+                mode: "absolute"
+            })
+        );
+
+
+        var seg2 = profile.appendSegment(
+            motionProfileFactory.createAccelSegment("time-distance", {
+                t0: 1,
+                tf: 2,
+                p0: seg1.evaluatePositionAt(seg1.finalTime),
+                v0: seg1.evaluateVelocityAt(seg1.finalTime),
+                pf: 55,
+                jPct: 0.5,
+                mode: "absolute"
+            })
+        );
+
+        var seg3 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: 0,
+                tf: 3.7,
+                p0: 0,
+                pf: 8,
+                v: 0,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.7,
+                decJerk: 0.4,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'absolute'
+            })
+        );
+
+        var bs = profile.getAllBasicSegments();
+        expect(bs[bs.length-1].finalTime).toBe(3.7);
+        expect(profile.evaluatePositionAt(2.5)).toBeCloseTo(51.2062529, 6);
+
+        profile.setInitialConditions(-11, 13, 0,0,0);
+
+        expect(profile.evaluateVelocityAt(0.25)).toBeCloseTo(1140/60, 4);
+        expect(profile.evaluateVelocityAt(0.65)).toBeCloseTo(2292/60, 4);
+        expect(profile.evaluateVelocityAt(1.3)).toBeCloseTo(2548/60, 4);
+        expect(profile.evaluateVelocityAt(1.9)).toBeCloseTo(1304.8/60, 4);
+        expect(profile.evaluateVelocityAt(2.2)).toBeCloseTo(61.4333/60, 4);
+        expect(profile.evaluateVelocityAt(3)).toBeCloseTo(-3118.23529/60, 4);
+        expect(profile.evaluateVelocityAt(3.5)).toBeCloseTo(-124.295/60, 4);
+
+        expect(profile.evaluatePositionAt(0.25)).toBeCloseTo(-7.25, 4);
+        expect(profile.evaluatePositionAt(0.65)).toBeCloseTo(4.19, 4);
+        expect(profile.evaluatePositionAt(1.3)).toBeCloseTo(34.031111, 4);
+        expect(profile.evaluatePositionAt(1.9)).toBeCloseTo(52.875111, 4);
+        expect(profile.evaluatePositionAt(2.2)).toBeCloseTo(57.86816628, 4);
+        expect(profile.evaluatePositionAt(3)).toBeCloseTo(23.7044118, 4);
+        expect(profile.evaluatePositionAt(3.5)).toBeCloseTo(5.53960928, 4);
+    });
+
+    it('should create a profile that starts with an index, and correctly invert it', function () {
+        var profile = motionProfileFactory.createMotionProfile("rotary");
+
+        var seg1 = profile.appendSegment(
+            motionProfileFactory.createAccelSegment("time-distance", {
+                t0: 0,
+                tf: 1,
+                p0: 0,
+                v0: 0,
+                pf: 20,
+                jPct: 0.5,
+                mode: "absolute"
+            })
+        );
+
+        var seg2 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: 0,
+                tf: 3.7,
+                p0: 0,
+                pf: 8,
+                v: 0,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.7,
+                decJerk: 0.4,
+                xSkew: null,
+                ySkew: null,
+                shape: 'trapezoid',
+                mode: 'absolute'
+            })
+        );
+
+        expect(profile.evaluatePositionAt(1.5)).toBeCloseTo(32.8447, 4);
+        expect(profile.evaluatePositionAt(2.5)).toBeCloseTo(10, 4);
+        expect(profile.evaluatePositionAt(3.5)).toBeCloseTo(0.685185185, 4);
+
+        expect(profile.evaluateVelocityAt(1.5)).toBeCloseTo(58.12/60, 4);
+        expect(profile.evaluateVelocityAt(2.5)).toBeCloseTo(-1600/60, 4);
+        expect(profile.evaluateVelocityAt(3.5)).toBeCloseTo(1788.888888888/60, 4);
+
+        profile.invertSegment(seg2.id);
+
+        expect(profile.evaluatePositionAt(1.5)).toBeCloseTo(34.27578347, 4);
+        expect(profile.evaluatePositionAt(2.5)).toBeCloseTo(24, 4);
+        expect(profile.evaluatePositionAt(3.5)).toBeCloseTo(24.548148148, 4);
+
+        expect(profile.evaluateVelocityAt(1.5)).toBeCloseTo(526.495726/60, 4);
+        expect(profile.evaluateVelocityAt(2.5)).toBeCloseTo(-800/60, 4);
+        expect(profile.evaluateVelocityAt(3.5)).toBeCloseTo(1911.111111111/60, 4);
+
+        profile.invertSegment(seg2.id);
+
+        expect(profile.evaluatePositionAt(1.5)).toBeCloseTo(32.8447, 4);
+        expect(profile.evaluatePositionAt(2.5)).toBeCloseTo(10, 4);
+        expect(profile.evaluatePositionAt(3.5)).toBeCloseTo(0.685185185, 4);
+
+        expect(profile.evaluateVelocityAt(1.5)).toBeCloseTo(58.12/60, 4);
+        expect(profile.evaluateVelocityAt(2.5)).toBeCloseTo(-1600/60, 4);
+        expect(profile.evaluateVelocityAt(3.5)).toBeCloseTo(1788.888888888/60, 4);
+
+        expect(function () {profile.invertSegment(seg1.id)}).toThrowError('You cannot invert this segment.');
+    });
+
 });
-
-
