@@ -95,4 +95,25 @@ describe('Unit: indexSegmentFactory testing', function() {
         expect(seg4.evaluateVelocityAt(seg4.finalTime)).toBeCloseTo(0.463, 4);
     });
 
+    it('should create an absolute index segment and invert it twice', function () {
+        // t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode, loads
+        var seg = indexSegmentFactory.Make(0, 8, 0, 4, 0, null, null, 0.1, 0, null, null, 'trapezoid', 'incremental');
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
+        expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
+
+
+        seg.invert();
+
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(-2, 4);
+
+
+        seg.invert();
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
+        expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
+
+    });
+
 });
