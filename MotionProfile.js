@@ -58,11 +58,19 @@ var Util = require('../util/util');
 var MotionPoint = require('./motionPoint').MotionPoint;
 var _ = require('underscore');
 
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : 9007199254740991;
+
 /**
  * MOTION PROFILE OBJECT LOGIC
  */
 
-var MotionProfile = function(type) {
+/**
+ * Constructor for a motion profile object.
+ * @param {string} type              'rotary' or 'linear'
+ * @param {Object} initialConditions optional object with fields position, velocity, thrust, load,
+ * and friction. If not provided, values set to 0 by default. If provided, all values must be present.
+ */
+var MotionProfile = function(type, initialConditions) {
 	// rotary is treated as default
 	this.type = type.toLowerCase() === "rotary" ? "rotary" : "linear";
 	this.initialPosition = 0;
@@ -73,14 +81,21 @@ var MotionProfile = function(type) {
 
 	//create object to hold all the profile loads
 	var loads = {};
-
+	var initLoad = {};
 	if (this.type === "rotary") {
 		Object.keys(LoadSegment.RotaryLoadsEnum).forEach(function(load) {
 			loads[load] = SegmentStash.makeStash();
+
+			initLoad = LoadSegment.createLoadSegment(load, 0, MAX_SAFE_INTEGER, 0, 0);
+			initLoad.segmentData.constant = true;
+			loads[load].insertAt(initLoad, null);
 		});
 	} else {
 		Object.keys(LoadSegment.LinearLoadsEnum).forEach(function(load) {
 			loads[load] = SegmentStash.makeStash();
+			initLoad = LoadSegment.createLoadSegment(load, 0, MAX_SAFE_INTEGER, 0, 0);
+			initLoad.segmentData.constant = true;
+			loads[load].insertAt(initLoad, null);
 		});
 	}
 
@@ -89,6 +104,18 @@ var MotionProfile = function(type) {
 	this.undoManager = undoManager;
 
 	MotionSegment.MotionSegment.call(this);
+
+	if (!initialConditions) {
+		this.setInitialConditions(0, 0, 0, 0, 0);
+	} else {
+		this.setInitialConditions(
+			initialConditions.position,
+			initialConditions.velocity,
+			initialConditions.load,
+			initialConditions.thrust,
+			initialConditions.friction
+		);
+	}
 };
 
 
@@ -101,19 +128,95 @@ MotionProfile.prototype.constructor = MotionProfile;
  * @param {Number} position position in [rad] or [m]
  * @param {Number} velocity velocity in [rad/s] or [m/s]
  */
-MotionProfile.prototype.setInitialConditions = function(position, velocity, load, thrust, friction) {
+MotionProfile.prototype.setInitialConditions = function(position, velocity, load, thrust, friction, skipUndo) {
+
+	// var p, v, l, t, f;
+	// p = this.initialPosition;
+	// v = this.initialVelocity;
+	// l = this.initialLoad;
+	// t = this.initialThrust;
+	// f = this.initialFriction;
+
 	this.initialPosition = position;
 	this.initialVelocity = velocity;
 
-	this.initialThrust = thrust || 0;
-	this.initialLoad = load || 0;
-	this.initialFriction = friction || 0;
+	this.initialThrust = thrust || this.initialThrust;
+	this.initialLoad = load || this.initialLoad;
+	this.initialFriction = friction || this.initialFriction;
+
+	// check loads to see if they are a single constant segment
+	var loadEnums = {};
+	if (this.type == 'rotary') {
+		loadEnums = LoadSegment.RotaryLoadsEnum;
+	} else if (this.type == 'linear') {
+		loadEnums = LoadSegment.LinearLoadsEnum;
+	}
+
+	var loadSeg;
+	var profile = this;
+	Object.keys(loadEnums).forEach(function(loadType, iter) {
+		loadSeg = profile.profileLoads[loadType].firstSegment();
+		if (profile.profileLoads[loadType].constant == true) {
+			switch (iter+1) {
+				case 1:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialFriction,
+						finalValue: profile.initialFriction
+					});
+				case 2:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialLoad,
+						finalValue: profile.initialLoad
+					});
+				case 3:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialThrust,
+						finalValue: profile.initialThrust
+					});
+			}
+		} else {
+			switch (iter+1) {
+				case 1:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialFriction
+					});
+				case 2:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialLoad
+					});
+				case 3:
+					loadSeg.modifySegmentValues({
+						initialValue: profile.initialThrust
+					});
+			}
+		}
+	});
 
 
-	//after setting initial conditions, all subsequent modules must be recalculated
+	// // after setting initial conditions, all subsequent modules must be recalculated
 	var current = this.segments.firstSegment();
 
-	this.recalculateProfileSegments(current);
+	// try {
+		this.recalculateProfileSegments(current);
+	// } catch (err) {
+	// 	this.setInitialConditions(p, v, l, t, f);
+	// 	skipUndo = true;
+	// 	throw new Error('Unable to modify initial conditions as it would invalidate a segment.');
+	// }
+
+
+	// if (!skipUndo) {
+	// 	var that = this;
+	// 	this.undoManager.add({
+	// 		undo: function () {
+	// 			that.setInitialConditions(p, v, l, t, f);
+	// 		},
+	// 		redo: function () {
+	// 			that.setInitialConditions(position, velocity, load, thrust, friction);
+	// 		}
+	// 	});
+	// }
+
 };
 
 
@@ -155,6 +258,7 @@ MotionProfile.prototype.getAllBasicSegments = function() {
 		return a.concat(b);
 	});
 };
+
 
 /**
  * Recalculates motion profile segments due to a change. Starts recalculating at passed-in segment
@@ -470,7 +574,7 @@ MotionProfile.prototype.findById = function(segmentId) {
 
 
 MotionProfile.prototype.replaceSegment = function (oldId, newSegment) {
-	this.segments.replaceSegment(oldId, newSegment);
+	this.segments.replace(oldId, newSegment);
 };
 
 
@@ -501,32 +605,54 @@ MotionProfile.prototype.getValidLoadTypes = function() {
  * Adds a load segment to the profile
  * @param {LoadSegment} loadSegment load segment to be added
  */
-MotionProfile.prototype.addLoadSegment = function(loadSegment) {
+MotionProfile.prototype.addLoadSegment = function(loadSegment, skipUndo) {
 	if (!LoadSegment.LoadSegment.prototype.isValidType(this.type, loadSegment.segmentData.loadType))
 		throw new Error("Load type '" + loadSegment.segmentData.loadType + "' is not valid for " + this.type + " profiles");
 
+	var lType = loadSegment.segmentData.loadType;
+	var allLoadSegs = this.profileLoads[loadSegment.segmentData.loadType].getAllSegments();
+	var replace = false;
+
 	// insert or append
-	if (this.profileLoads[loadSegment.segmentData.loadType].findOverlappingSegment(loadSegment.initialTime, loadSegment.finalTime))
+	if (allLoadSegs.length == 1 && allLoadSegs[0].segmentData.finalTime == MAX_SAFE_INTEGER) {
+		// if we have a constant segment, replace it
+		replace = true;
+
+	} else if (this.profileLoads[loadSegment.segmentData.loadType].findOverlappingSegment(loadSegment.initialTime, loadSegment.finalTime)) {
 		throw new Error("New segment overlaps an existing segment");
+	}
 
-	// find previous segment. Needed in case of insertion
-	var prevSegment = this.profileLoads[loadSegment.segmentData.loadType].getPreviousByInitialTime(loadSegment.t0);
-	var prevId = null;
-	if (prevSegment)
-		prevId = prevSegment.id;
+	if (replace) {
+		// this.profileLoads[lType].replace(allLoadSegs[0].id, loadSegment);
+		this.profileLoads[lType].delete(allLoadSegs[0].id);
+		this.profileLoads[lType].insertAt(loadSegment, null);
+	} else {
+		// find previous segment. Needed in case of insertion
+		var prevSegment = this.profileLoads[loadSegment.segmentData.loadType].getPreviousByInitialTime(loadSegment.t0);
+		var prevId = null;
+		if (prevSegment)
+			prevId = prevSegment.id;
 
-	this.profileLoads[loadSegment.segmentData.loadType].insertAt(loadSegment, prevId);
+		this.profileLoads[loadSegment.segmentData.loadType].insertAt(loadSegment, prevId);
+	}
 
 	// undo/redo
-	var profile = this;
-	this.undoManager.add({
-		undo: function() {
-			profile.deleteLoadSegment(loadSegment.id, loadSegment.segmentData.loadType);
-		},
-		redo: function() {
-			profile.addLoadSegment(loadSegment);
-		}
-	});
+	if (!skipUndo) {
+		var profile = this;
+		this.undoManager.add({
+			undo: function() {
+				if (replace) {
+					profile.deleteLoadSegment(loadSegment.id, loadSegment.segmentData.loadType, true);
+					profile.addLoadSegment(allLoadSegs[0], true);
+				} else {
+					profile.deleteLoadSegment(loadSegment.id, loadSegment.segmentData.loadType, true);
+				}
+			},
+			redo: function() {
+				profile.addLoadSegment(loadSegment, true);
+			}
+		});
+	}
 };
 
 
@@ -536,7 +662,7 @@ MotionProfile.prototype.addLoadSegment = function(loadSegment) {
  * @param  {string} type      load type
  * @return {LoadSegment}      deleted load segment
  */
-MotionProfile.prototype.deleteLoadSegment = function(segmentId, type) {
+MotionProfile.prototype.deleteLoadSegment = function(segmentId, type, skipUndo) {
 	// passing  type is optional, but helpful
 	if (type) {
 		if (!this.profileLoads[type])
@@ -555,21 +681,23 @@ MotionProfile.prototype.deleteLoadSegment = function(segmentId, type) {
 	});
 
 	//undo / redo
-	var profile = this;
-	this.undoManager.add({
-		undo: function() {
-			profile.addLoadSegment(deletedSegment);
-		},
-		redo: function() {
-			profile.deleteLoadSegment(segmentId, type);
-		}
-	});
+	if (!skipUndo) {
+		var profile = this;
+		this.undoManager.add({
+			undo: function() {
+				profile.addLoadSegment(deletedSegment);
+			},
+			redo: function() {
+				profile.deleteLoadSegment(segmentId, type);
+			}
+		});
+	}
 
 	return deletedSegment;
 };
 
 
-MotionProfile.prototype.modifyLoadSegment = function(segmentId, newSegmentData) {
+MotionProfile.prototype.modifyLoadSegment = function(segmentId, newSegmentData, skipUndo) {
 	if (!newSegmentData.segmentData.loadType)
 		throw new Error("Expecting new segment to have type");
 
@@ -583,16 +711,18 @@ MotionProfile.prototype.modifyLoadSegment = function(segmentId, newSegmentData) 
 	this.addLoadSegment(newSegmentData);
 
 	//undo / redo
-	var profile = this;
-	this.undoManager.add({
-		undo: function() {
-			profile.deleteLoadSegment(newSegmentData.id);
-			profile.addLoadSegment(segment, segment.type);
-		},
-		redo: function() {
-			profile.modifyLoadSegment(segmentId, newSegmentData);
-		}
-	});
+	if (!skipUndo) {
+		var profile = this;
+		this.undoManager.add({
+			undo: function() {
+				profile.deleteLoadSegment(newSegmentData.id);
+				profile.addLoadSegment(segment, segment.type);
+			},
+			redo: function() {
+				profile.modifyLoadSegment(segmentId, newSegmentData);
+			}
+		});
+	}
 };
 
 
@@ -605,16 +735,19 @@ MotionProfile.prototype.getAllLoadSegments = function(type) {
 
 	// if there is not specific type, all load segments are returned
 	if(!type) {
-		var allLoadSegments=[];
-		var that=this;
-		Object.keys(this.getValidLoadTypes()).forEach(function(type){
-			allLoadSegments=allLoadSegments.concat(that.profileLoads[type].getAllSegments());
+		var loadSegments;
+		var allLoadSegments = [];
+		var that = this;
+		Object.keys(this.getValidLoadTypes()).forEach(function(type) {
+			loadSegments = that.profileLoads[type].getAllSegments();
+			allLoadSegments = allLoadSegments.concat(loadSegments);
 		});
 		return allLoadSegments;
 	}
 
-	if (!this.profileLoads[type])
+	if (!this.profileLoads[type]) {
 		throw new Error("load type '" + type + "' doesn't appear to be a valid load segment type");
+	}
 
 	return this.profileLoads[type].getAllSegments();
 };
@@ -650,6 +783,8 @@ MotionProfile.prototype.generateBasicSegments = function () {
 	var times = _.uniq([].concat(segTimesI, loadTimesI, segTimesF, loadTimesF)).sort(function (current, next) {
 		return current-next;
 	});
+
+	times = _.without(times, MAX_SAFE_INTEGER);
 
 	// set up variables
 	var f_i, f_f, l_i, l_f, t_i, t_f; // load variables
@@ -776,6 +911,29 @@ MotionProfile.prototype.pasteSegment = function (segmentId) {
 };
 
 
+MotionProfile.prototype.invertSegment = function (segmentId) {
+	var seg = this.findById(segmentId);
+	if (typeof seg.invert == 'function') {
+		seg.invert();
+
+		var that = this;
+		this.undoManager.add({
+			undo: function () {
+				seg.invert();
+			},
+			redo: function () {
+				seg.invert();
+			}
+		});
+
+		var next = this.segments.getNextSegment(segmentId);
+		this.recalculateProfileSegments(next);
+	} else {
+		throw new Error('You cannot invert this segment.');
+	}
+}
+
+
 var factory = {};
 
 factory.createMotionProfile = function(type) {
@@ -819,7 +977,7 @@ factory.createIndexSegment = function(segment) {
 		throw new Error("Need segment data to create a segment");
 
 	// function(t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode)
-	return IndexSegment.Make(segment.t0, segment.tf, segment.p0, segment.pf, segment.v, segment.velLimPos, segment.velLimNeg, segment.accJerk, segment.decJerk, segment.xSkew, segment.ySkew, segment.shape, segment.mode);
+	return IndexSegment.Make(segment.t0, segment.tf, segment.p0, segment.pf, segment.v, segment.velLimPos, segment.velLimNeg, segment.accJerk, segment.decJerk, segment.xSkew, segment.ySkew, segment.shape, segment.mode, segment.loads);
 };
 
 
@@ -894,9 +1052,18 @@ factory.deserialize = function(jsonProfile) {
 	if (!profileObj)
 		throw new Error("Expecting key 'profile' to exist in the json string");
 
+
+
 	var that = this;
 
 	var profile = new MotionProfile(profileObj.type);
+
+	profile.initialVelocity=profileObj.initialVelocity || 0;
+	profile.initialPosition=profileObj.initialPosition || 0;
+	profile.initialLoad=profileObj.initialLoad || 0;
+	profile.initialThrust = profileObj.initialThrust || 0;
+	profile.initialFriction = profileObj.initialFriction || 0;
+
 
 	if(profileObj.type==='linear')
 		profile.setInclination(profileObj.inclination);
@@ -1007,6 +1174,7 @@ factory.convertV1ToV2 = function(motionProfile) {
 factory.AccelMotionSegment = AccelSegment.AccelMotionSegment;
 factory.IndexMotionSegment = IndexSegment.IndexMotionSegment;
 factory.CamMotionSegment = CamSegment.CamMotionSegment;
+factory.CruiseDwellMotionSegment = CruiseDwellSegment.CruiseDwellMotionSegment;
 factory.MotionPoint = MotionPoint.MotionPoint;
 
 
@@ -1081,6 +1249,12 @@ var CruiseDwellMotionSegment = function(data, loads) {
 	this.initialTime = data.initialTime;
 	this.finalTime = data.finalTime;
 
+	if (data.permutation == 'time') {
+		data.finalPosition = data.initialPosition + data.velocity * (data.finalTime - data.initialTime);
+	} else if (data.permutation == 'distance') {
+		data.finalTime = data.initialTime + (data.finalPosition - data.initialPosition)/data.velocity;
+	}
+
 	this.segmentData = {
 		initialTime: data.initialTime,
 		finalTime: data.finalTime,
@@ -1093,10 +1267,14 @@ var CruiseDwellMotionSegment = function(data, loads) {
 		mode: data.mode,
 	};
 
+
 	MotionSegment.MotionSegment.call(this, this.segmentData.initialTime, this.segmentData.finalTime);
 	this.setBasicSegmentLoads(loads);
 
-	if(this.segmentData.permutation=='distance' && FastMath.gt(this.segmentData.distance,0) && FastMath.equal(this.segmentData.velocity, 0))
+	// if (this.segmentData.permutation == 'distance' && FastMath.lt(this.segmentData.duration, 0)) {
+	// 	throw new Error("Unable to create a cruise/dwell segment with zero initial velocity and non zero distance");
+	// }
+	if(FastMath.notEqual(this.segmentData.distance, 0) && FastMath.equal(this.segmentData.velocity, 0))
 		throw new Error("Unable to create a cruise/dwell segment with zero initial velocity and non zero distance");
 
 	var basicSegment = this.calculateBasicSegment(
@@ -1115,8 +1293,8 @@ CruiseDwellMotionSegment.prototype.constructor = CruiseDwellMotionSegment;
 
 /**
  * Modifies initial values with a new start point
- * @param  {MotionPoint} startPoint describes new initial conditions
- * @return {CruiseDwellSegment}            current segment
+ * @param  {MotionPoint}			startPoint describes new initial conditions
+ * @return {CruiseDwellSegment}		current segment
  */
 CruiseDwellMotionSegment.prototype.modifyInitialValues = function(startPoint) {
 	var t0 = startPoint.time;
@@ -1135,14 +1313,12 @@ CruiseDwellMotionSegment.prototype.modifyInitialValues = function(startPoint) {
 
 		this.segmentData.initialTime = t0;
 
-		if(FastMath.gt(this.segmentData.distance,0) && FastMath.equal(this.segmentData.velocity,0))
+		if(FastMath.notEqual(this.segmentData.distance,0) && FastMath.equal(this.segmentData.velocity,0))
 			throw new Error("Cannot modify cruise/dwell segment because of non-zero distance and zero velocity");
 
 		this.segmentData.duration = this.segmentData.distance/this.segmentData.velocity;
 		this.segmentData.finalTime = this.segmentData.initialTime + this.segmentData.duration;
-		if (FastMath.leq(this.segmentData.duration, 0)) {
-			throw new Error('Cannot have permutation distance and time <= 0');
-		}
+
 	} else if (this.segmentData.permutation == 'time') {
 		this.segmentData.initialTime = t0;
 		if (this.segmentData.mode == 'incremental') {
@@ -1154,6 +1330,10 @@ CruiseDwellMotionSegment.prototype.modifyInitialValues = function(startPoint) {
 		this.segmentData.initialPosition = p0;
 		this.segmentData.distance = this.segmentData.velocity*this.segmentData.duration;
 		this.segmentData.finalPosition = this.segmentData.initialPosition + this.segmentData.distance;
+	}
+
+	if (FastMath.leq(this.segmentData.duration, 0)) {
+		throw new Error('Cannot have permutation distance and time <= 0');
 	}
 
 	this.initialTime = t0;
@@ -1339,10 +1519,24 @@ AccelMotionSegment.prototype.importFromData = function(data) {
 
 	switch (data.constructor) {
 		case "AccelSegmentTimeVelocity":
-			return new AccelSegmentTimeVelocity(0, data.duration, 0, 0, data.finalVelocity, data.jerkPercent, data.mode, data.loads);
+			return new AccelSegmentTimeVelocity(data.initialTime,
+												data.finalTime,
+												data.initialPosition,
+												data.initialVelocity,
+												data.finalVelocity,
+												data.jerkPercent,
+												data.mode,
+												data.loads);
 
 		case "AccelSegmentTimeDistance":
-			return new AccelSegmentTimeDistance(0, data.duration, 0, 0, data.distance, data.jerkPercent, data.mode, data.loads);
+			return new AccelSegmentTimeDistance(data.initialTime,
+												data.finalTime,
+												data.initialPosition,
+												data.initialVelocity,
+												data.distance,
+												data.jerkPercent,
+												data.mode,
+												data.loads);
 	}
 
 	throw new Error("Unkown AccelSegment type: " + data.constructor);
@@ -1365,6 +1559,7 @@ var AccelSegmentTimeVelocity = function(t0, tf, p0, v0, vf, jPct, mode, loads) {
 		mode: mode,
 		initialTime: t0,
 		finalTime: tf,
+		initialPosition: p0,
 		initialVelocity: v0,
 		finalVelocity: vf,
 		duration: tf - t0,
@@ -1483,6 +1678,15 @@ AccelSegmentTimeVelocity.prototype.modifyInitialValues = function(startPoint) {
 			throw new Error('tried to move initial time past final time for absolute segment');
 	}
 
+
+	this.segmentData.initialVelocity=v0;
+	this.segmentData.initialPosition=p0;
+	this.segmentData.initialTime=t0;
+
+	this.segmentData.finalTime=tf;
+	this.segmentData.finalVelocity=vf;
+
+
 	var newBasicSegments = this.calculateBasicSegments(t0, tf, p0, v0, vf, this.segmentData.jerkPercent);
 
 	this.initialTime = newBasicSegments[0].initialTime;
@@ -1534,10 +1738,10 @@ AccelSegmentTimeVelocity.prototype.modifySegmentValues = function(newSegmentData
 		switch (newSegmentData.dataPermutation) {
 			case 'time-distance':
 				var newAccSeg =  new AccelSegmentTimeDistance(
-					initialConditions.time,
+					this.segmentData.initialTime,
 					this.segmentData.finalTime,
-					initialConditions.position,
-					initialConditions.velocity,
+					this.segmentData.initialVelocity,
+					this.segmentData.initialPosition,
 					this.evaluatePositionAt(this.segmentData.finalTime),
 					this.segmentData.jerkPercent,
 					this.segmentData.mode,
@@ -1590,9 +1794,12 @@ var AccelSegmentTimeDistance = function(t0, tf, p0, v0, pf, jPct, mode, loads) {
 
 	//incremental and absolute segments are instantiated the same way
 	this.segmentData = {
+		initialTime: t0,
+		finalTime: tf,
+		initialVelocity: v0,
+		initialPosition: p0,
 		dataPermutation: "time-distance",
 		finalPosition: pf,
-		finalTime: tf,
 		distance: pf - p0,
 		duration: tf - t0,
 		mode: mode,
@@ -1728,6 +1935,16 @@ AccelSegmentTimeDistance.prototype.modifyInitialValues = function(startPoint) {
 			throw new Error("attempt to change initial time past final time for absolute segment");
 	}
 
+
+	this.segmentData.initialVelocity=v0;
+	this.segmentData.initialPostiion=p0;
+	this.segmentData.initialTime=t0;
+
+	this.segmentData.finalTime=tf;
+	this.segmentData.finalPosition=pf;
+
+
+
 	var newBasicSegments = this.calculateBasicSegments(t0, tf, p0, v0, pf, this.segmentData.jerkPercent);
 
 	this.initialTime = newBasicSegments[0].initialTime;
@@ -1813,7 +2030,6 @@ AccelSegmentTimeDistance.prototype.modifySegmentValues = function(newSegmentData
 
 	return this;
 };
-
 
 
 /**
@@ -2231,6 +2447,11 @@ CamMotionSegment.prototype.calculateCubic = function(X, Y, s0, sf) {
     var C = [];
 
 
+    var a =[];
+    var b=[];
+    var c=[];
+
+
     for (var row = 0; row < rows; row++) {
         //create a new row and fill with zeroes
         A[row] = Array.apply(null, new Array(cols)).map(Number.prototype.valueOf, 0);
@@ -2250,6 +2471,16 @@ CamMotionSegment.prototype.calculateCubic = function(X, Y, s0, sf) {
 
         for (var col = startCol; col <= stopCol; col++) {
             A[row][col] = Am(col - row + 2, row, h);
+            switch(col-row+2) {
+                case 1: a.push(A[row][col]);
+                    break;
+                case 2: b.push(A[row][col]);
+                    break;
+                case 3: c.push(A[row][col]);
+                    break;
+                default:
+                    throw new Error("1, 2 or 3 only!");
+            }
         }
 
         B[row] = [];
@@ -2257,12 +2488,18 @@ CamMotionSegment.prototype.calculateCubic = function(X, Y, s0, sf) {
 
     }
 
-    var Ainv = numeric.inv(A);
-    C = numeric.dot(Ainv, B);
 
-    //flatten result into one array mk
-    var mk = [];
-    mk = mk.concat.apply(mk, C);
+    var mk=fastMath.solveTridiagonalMatrix(a,b,c,Array.prototype.concat.apply([], B));
+
+    //thomas method may fail, so do full solve
+    if (!mk) {
+        var Ainv = numeric.inv(A);
+        C = numeric.dot(Ainv, B);
+
+        //flatten result into one array mk
+        mk = [];
+        mk = mk.concat.apply(mk, C);
+    }
 
     //calculate the rest of coefficients
     var aa = [];
@@ -2740,21 +2977,19 @@ IndexSegment.prototype.modifyInitialValues = function(startPoint) {
 
 	var tf;
 	var pf;
-	var t0=startPoint.time;
-	var a0=startPoint.acceleration;
-	var v0=startPoint.velocity;
-	var p0=startPoint.position;
+	var t0 = startPoint.time;
+	var a0 = startPoint.acceleration;
+	var v0 = startPoint.velocity;
+	var p0 = startPoint.position;
 
-
-	if (this.segmentData.mode === "incremental") {
+	if (this.segmentData.mode === 'incremental') {
 		tf = t0 + this.segmentData.duration;
-		pf = p0 + this.segmentData.finalPosition - this.segmentData.initialPosition;
-	} else {
+		pf = p0 + this.segmentData.distance;
+	} else if (this.segmentData.mode == 'absolute') {
 		tf = this.segmentData.finalTime;
 		pf = this.segmentData.finalPosition;
-		this.segmentData.duration = tf - t0;
-		if (FastMath.lt(this.segmentData.duration, 0))
-			throw new Error('tried to move initial time past final time for absolute segment');
+		if (FastMath.leq(tf, t0))
+			throw new Error('Segments cannot have time change less than or equal to 0');
 	}
 
 	var newBasicSegments = this.calculateBasicSegments(t0,
@@ -2770,6 +3005,15 @@ IndexSegment.prototype.modifyInitialValues = function(startPoint) {
 		this.segmentData.ySkew,
 		this.segmentData.shape
 	);
+
+	this.segmentData.duration = tf-t0;
+	this.segmentData.distance = pf-p0;
+	this.segmentData.finalTime = tf;
+	this.segmentData.initialTime = startPoint.time;
+	this.segmentData.initialVelocity = startPoint.velocity;
+	this.segmentData.finalVelocity = startPoint.velocity
+	this.segmentData.initialPosition = startPoint.position;
+	this.segmentData.finalPosition = pf;
 
 	this.initialTime = newBasicSegments[0].initialTime;
 	this.finalTime = newBasicSegments[newBasicSegments.length - 1].finalTime;
@@ -2812,12 +3056,12 @@ IndexSegment.prototype.modifySegmentValues = function(newSegmentData, initialCon
 		this.segmentData.finalTime = newSegmentData.finalTime || this.segmentData.finalTime;
 		this.segmentData.finalPosition = newSegmentData.finalPosition || this.segmentData.finalPosition;
 
-		this.segmentData.duration = this.segmentData.finalTime - initialConditions.time;
-		this.segmentData.distance = this.segmentData.finalPosition - initialConditions.position;
+		this.segmentData.duration = this.segmentData.finalTime - this.segmentData.initialTime;
+		this.segmentData.distance = this.segmentData.finalPosition - this.segmentData.initialPosition;
 	}
 
 	// consider replacing all this junk with _.mergeWith
-	this.initialTime = initialConditions.time;
+	this.initialTime = this.segmentData.initialTime;
 	this.finalTime = this.segmentData.finalTime;
 
 	var newLoads = {};
@@ -2826,11 +3070,11 @@ IndexSegment.prototype.modifySegmentValues = function(newSegmentData, initialCon
 	// this.segmentData.loads = newLoads;
 
 	var newBasicSegments = this.calculateBasicSegments(
-		initialConditions.time,
+		this.segmentData.initialTime,
 		this.segmentData.finalTime,
-		initialConditions.position,
+		this.segmentData.initialPosition,
 		this.segmentData.finalPosition,
-		initialConditions.velocity,
+		this.segmentData.initialVelocity,
 		this.segmentData.velLimPos,
 		this.segmentData.velLimNeg,
 		this.segmentData.accJerk,
@@ -2846,6 +3090,19 @@ IndexSegment.prototype.modifySegmentValues = function(newSegmentData, initialCon
 	return this;
 };
 
+
+IndexSegment.prototype.invert = function () {
+	this.modifySegmentValues({
+		finalPosition: this.segmentData.initialPosition - this.segmentData.distance,
+		distance: -this.segmentData.distance
+	}, {
+		time: null,
+		position: null,
+		velocity: null
+	});
+
+	return this.segmentData;
+}
 
 /**
  * Makes a new IndexMotionSegment given velocity information
@@ -2934,7 +3191,7 @@ var LoadSegment = function(type, t0, tf, initVal, finalVal) {
 		initialValue: initVal,
 		finalValue: finalVal,
 		loadType: type,
-		constant: true
+		constant: false
 	};
 
 	var slope = (finalVal - initVal) / (tf - t0);
@@ -2962,6 +3219,21 @@ LoadSegment.prototype.importFromData = function(data) {
 	return new LoadSegment(data.loadType, data.initialType, data.finalTime, data.initialValue, data.finalValue);
 };
 
+
+
+LoadSegment.prototype.modifySegmentValues = function (newSegmentData) {
+	this.segmentData.initialTime = newSegmentData.initialTime || this.segmentData.initialTime;
+	this.segmentData.finalTime = newSegmentData.finalTime || this.segmentData.finalTime;
+	this.segmentData.initialValue = newSegmentData.initialValue || this.segmentData.initialValue;
+	this.segmentData.finalValue = newSegmentData.finalValue || this.segmentData.finalValue;
+	this.segmentData.loadType = newSegmentData.loadType || this.segmentData.loadType;
+	this.segmentData.constant = newSegmentData.constant || this.segmentData.constant;
+
+	this.slope = (this.segmentData.finalValue - this.segmentData.initialValue) / (this.segmentData.finalTime - this.segmentData.initialTime);
+	this.iSect = this.segmentData.initialValue - this.slope*this.segmentData.initialTime + this.slope*this.segmentData.initialTime;
+
+	this.loadPoly = polynomialFactory.createPolyAbCd([0, 0, this.slope, this.iSect], this.segmentData.initialTime, this.segmentData.finalTime);
+}
 
 /**
  * Exports data representation of the segment
@@ -2992,6 +3264,13 @@ LoadSegment.prototype.isValidType = function(profileType, type) {
 var factory = {};
 
 factory.createLoadSegment = function(type, t0, tf, initialLoad, finalLoad) {
+	if (fastMath.lt(tf, t0)) {
+		throw new Error('final time must come after initial time');
+	}
+
+	// if (fastMath.lt(t0, 0)) {
+	// 	throw new Error("Initial time cannot be less than 0");
+	// }
 	if (fastMath.lt(t0, 0) || fastMath.lt(tf, 0))
 		throw new Error("initial time and final time must be greater than 0");
 	if (fastMath.geq(t0, tf))
@@ -3343,7 +3622,6 @@ SegmentStash.prototype.getPreviousSegment = function(segmentId) {
  * @returns {Array} array of Segment
  */
 SegmentStash.prototype.getAllSegments = function() {
-
 	return this.segmentsList.getDataArray();
 };
 
@@ -3510,7 +3788,7 @@ SegmentStash.prototype.initializeWithSegments = function(segments) {
 };
 
 
-SegmentStash.prototype.replaceSegment = function(id, seg) {
+SegmentStash.prototype.replace = function(id, seg) {
 	if (this.findById(id) !== null) {
 		this.nodesHash[id].data = seg;
 	} else {
@@ -3732,6 +4010,100 @@ FastMath.prototype.binaryIndexOfObject = function(searchElement, accessor) {
 	}
 
 	return ~maxIndex;
+};
+
+
+/**
+ * Solves tridiagonal matrix
+ *
+ * from https://github.com/feklee/tridiagonal-solve/blob/master/node_main.js
+ * 
+ * @param  {array} a the lower diagonal
+ * @param  {array} b the diagonal
+ * @param  {array} c the upper diagonal
+ * @param  {array} d right side of the matrix
+ * @return {array}   solved unknowns
+ */
+FastMath.prototype.solveTridiagonalMatrix = function (a, b, c, d) {
+	var createCp, createDp, solve, solve1;
+
+	// cp: c'
+	createCp = function (a, b, c, n) {
+	    var i, cp = [];
+
+	    cp[0] = c[0] / b[0];
+	    if (!isFinite(cp[0])) {
+	        return null;
+	    }
+
+	    for (i = 1; i < n - 1; i += 1) {
+	        cp[i] = c[i] / (b[i] - a[i - 1] * cp[i - 1]);
+	        if (!isFinite(cp[i])) {
+	            return null;
+	        }
+	    }
+
+	    return cp;
+	};
+
+	// dp: d'
+	createDp = function (a, b, d, cp, n) {
+	    var i, dp = [];
+
+	    dp[0] = d[0] / b[0];
+	    if (!isFinite(dp[0])) {
+	        return null;
+	    }
+
+	    for (i = 1; i < n; i += 1) {
+	        dp[i] = (d[i] - a[i - 1] * dp[i - 1]) / (b[i] - a[i - 1] * cp[i - 1]);
+	        if (!isFinite(dp[i])) {
+	            return null;
+	        }
+	    }
+
+	    return dp;
+	};
+
+	solve = function (a, b, c, d, n) {
+	    var i, x = [], cp, dp;
+
+	    cp = createCp(a, b, c, n);
+	    if (cp === null) {
+	        return null;
+	    }
+	    dp = createDp(a, b, d, cp, n);
+	    if (dp === null) {
+	        return null;
+	    }
+
+	    x[n - 1] = dp[n - 1];
+	    for (i = n - 2; i >= 0; i -= 1) {
+	        x[i] = dp[i] - cp[i] * x[i + 1];
+	    }
+
+	    return x;
+	};
+
+	solve1 = function (b, d) {
+	    var x = [d[0] / b[0]];
+
+	    return isFinite(x[0]) ? x : null;
+	};
+
+
+    var n = d.length;
+
+    if (n === 0) {
+        return [];
+    }
+
+    if (n === 1) {
+        return solve1(b, d);
+    }
+
+    return solve(a, b, c, d, n);
+
 };
 
 module.exports = new FastMath();
@@ -10225,7 +10597,7 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
             limit = 0,
             isExecuting = false,
             callback,
-            
+
             // functions
             execute;
 
@@ -10255,12 +10627,12 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
                 commands.splice(index + 1, commands.length - index);
 
                 commands.push(command);
-                
+
                 // if limit is set, remove items from the start
                 if (limit && commands.length > limit) {
                     removeFromTo(commands, 0, -(limit+1));
                 }
-                
+
                 // set the current index to the end
                 index = commands.length - 1;
                 if (callback) {
@@ -10337,14 +10709,14 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
             getIndex: function() {
                 return index;
             },
-            
+
             setLimit: function (l) {
                 limit = l;
             }
         };
     };
 
-if (typeof module !== 'undefined' && module.exports) {
+    if (typeof module !== 'undefined' && module.exports) {
 		module.exports = UndoManager;
 	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 		// AMD. Register as an anonymous module.
