@@ -416,6 +416,9 @@ describe('Unit: accelSegmentFactory testing', function() {
 
     });
 
+
+
+
     it("Should correctly serialize and deserialize an accel segment", function() {
 
         //note this only works with initial conditions equal to zero.
@@ -434,5 +437,17 @@ describe('Unit: accelSegmentFactory testing', function() {
         expect(seg.evaluatePositionAt(0.56)).toBeCloseTo(newSeg.evaluatePositionAt(0.56), 4);
 
     });
+
+
+    it('should be able to duplicate accel segment', function() {
+
+        var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
+
+        var dupe = seg.duplicate();
+
+        expect((dupe instanceof accelSegmentFactory.AccelMotionSegment)).toBe(true);
+        
+    });
+
 
 });

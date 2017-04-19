@@ -37,6 +37,18 @@ describe('Unit: cruise/dwell segment testing', function() {
         });
     });
 
+
+
+    it('should be able to duplicate a cruise dwell segment', function() {
+        var seg = cruiseSegmentFactory.Make(0, 0.5, 0, 0, 0, 'time', 'incremental');
+
+        var dupe= seg.duplicate();
+
+        expect((dupe instanceof cruiseSegmentFactory.CruiseDwellMotionSegment)).toBe(true);
+    });
+
+
+
     it('should throw when creating a cruise segment via non-zero distance and starting with v0=0 (t0=0,tf=0.5,p0=0,v0=0,pf=5', function() {
         expect(function() {
             cruiseSegmentFactory.Make(
