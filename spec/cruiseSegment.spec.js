@@ -49,7 +49,7 @@ describe('Unit: cruise/dwell segment testing', function() {
                 'incremental'
             );
         }).toThrow(
-            new Error("Unable to create a cruise/dwell segment with zero initial velocity and non zero distance")
+            new Error("Unable to create a cruise/dwell segment with zero velocity and non zero distance")
         );
     });
 

@@ -77,7 +77,7 @@ describe('Unit: cuty, copy, and paste testing', function() {
         expect(function() {
             profile.pasteSegment(indexSeg.id);
         }).toThrow(
-            new Error("final time must be greater than initial time")
+            new Error("Pasting segment failed with Error: Attempt to change final time to/before initial time for absolute segment")
         );
         expect(profile.getAllBasicSegments().length).toBe(9);
         expect(indexSeg.initialTime).toBe(10);
