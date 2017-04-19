@@ -1418,6 +1418,40 @@ CruiseDwellMotionSegment.prototype.calculateBasicSegment = function (t0, tf, p0,
 	return [basicSegmentFactory.CreateBasicSegment(t0, tf, [0, 0, v, p0])];
 };
 
+
+
+
+/**
+ * Gets pertinenta data to be able to serialize/deserilize segment
+ * @return {object} data representation of the segment
+ */
+CruiseDwellMotionSegment.prototype.exportData = function() {
+
+	var dataObj=MotionSegment.MotionSegment.prototype.exportData.call(this);
+
+	dataObj.type = 'CruiseDwellMotionSegment';
+
+	return dataObj;
+};
+
+/**
+ * Deserialize(create) CruiseDwellMotionSegment from a json string
+ * @param  {Object} data data representation of the segment (see exportData())
+ * @return {CruiseDwellMotionSegment}      [description]
+ */
+CruiseDwellMotionSegment.prototype.importFromData = function(data) {
+
+	if(data.constructor !== "CruiseDwellMotionSegment")
+		throw new Error("Unknown constructor for CruiseDwellMotionSegment");
+
+	return new  CruiseDwellMotionSegment(data, data.loads);
+
+};
+
+
+
+
+
 factory.CruiseDwellMotionSegment = CruiseDwellMotionSegment;
 
 
@@ -10597,7 +10631,7 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
             limit = 0,
             isExecuting = false,
             callback,
-
+            
             // functions
             execute;
 
@@ -10627,12 +10661,12 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
                 commands.splice(index + 1, commands.length - index);
 
                 commands.push(command);
-
+                
                 // if limit is set, remove items from the start
                 if (limit && commands.length > limit) {
                     removeFromTo(commands, 0, -(limit+1));
                 }
-
+                
                 // set the current index to the end
                 index = commands.length - 1;
                 if (callback) {
@@ -10709,14 +10743,14 @@ https://github.com/ArthurClemens/Javascript-Undo-Manager
             getIndex: function() {
                 return index;
             },
-
+            
             setLimit: function (l) {
                 limit = l;
             }
         };
     };
 
-    if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
 		module.exports = UndoManager;
 	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 		// AMD. Register as an anonymous module.
