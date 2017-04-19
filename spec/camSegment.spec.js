@@ -18,7 +18,7 @@ describe('Cubic spline calculations', function () {
 
         it('Result with s0=1, sf=2 should be [2,1,2,-1]', function () {
             var result = CamSegment.calculateCubic([1, 2], [2, 4], 1, 2);
-            // console.log(result);         
+            // console.log(result);
             expect(result).toEqual([[2, 1, 2, -1]]);
         });
 
@@ -44,7 +44,7 @@ describe('Cubic spline calculations', function () {
     describe('should solve points (0,0),(1,0),(3,2),(4,2)', function () {
         it('Result with s0=1 and sf=0 should be [', function () {
             var result = CamSegment.calculateCubic([0, 1, 3, 4], [0, 0, 2, 2], 0, 0);
-            // console.log(result);         
+            // console.log(result);
             expect(result).toEqual(
                 [[0, 0, -0.4285714285714286, 0.4285714285714286],
                   [0,
@@ -62,7 +62,7 @@ describe("Linear interpolation", function () {
     describe('should solve points (0,2)(2,4)', function () {
         it('Result should be [[2,1]]', function () {
             var result = CamSegment.calculateLinear([0, 2], [2, 4]);
-            // console.log(result);     
+            // console.log(result);
             expect(result.length).toBe(1);
             expect(result).toEqual([[2, 1, 0, 0]]);
         });
@@ -70,7 +70,7 @@ describe("Linear interpolation", function () {
 
     describe('should solve points (0,2)(2,4),(4,4)', function () {
         it('Result should be [ [ 2, 1,0,0 ], [ 4, 0,0,0 ]]', function () {
-            // console.log(result);     
+            // console.log(result);
             var result = CamSegment.calculateLinear([0, 2, 4], [2, 4, 4]);
             expect(result).toEqual([[2, 1, 0, 0], [4, 0, 0, 0]]);
         });
@@ -78,7 +78,7 @@ describe("Linear interpolation", function () {
 
     describe('should solve points (0,2)(2,4),(4,5)', function () {
         it('Result should be [ [ 2, 1,0,0 ], [ 4, 0.5,0,0 ]]', function () {
-            // console.log(result);     
+            // console.log(result);
             var result = CamSegment.calculateLinear([0, 2, 4], [2, 4, 5]);
             expect(result).toEqual([[2, 1, 0, 0], [4, 0.5, 0, 0]]);
         });
@@ -151,7 +151,7 @@ describe('Unit: cam segment (logix element) testing', function() {
 
 
     it ('should create a new cam segment with default values', function(){
-        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+        var camSeg=CamSegment.Make(0, 0, 0);
 
         expect(camSeg instanceof CamSegment.CamMotionSegment);
 
@@ -162,7 +162,7 @@ describe('Unit: cam segment (logix element) testing', function() {
 
 
     it ('should create a new cam segment with default values and then change initial values', function(){
-        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+        var camSeg=CamSegment.Make(0, 0, 0);
 
         expect(camSeg instanceof CamSegment.CamMotionSegment);
 
@@ -176,12 +176,12 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluatePositionAt(1.5)).toBe(1.75);
 
 
-    });    
+    });
 
 
 
     it ('should create a new cam segment with default values, change initial values forward and then change them again', function(){
-        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+        var camSeg=CamSegment.Make(0, 0, 0);
 
         expect(camSeg instanceof CamSegment.CamMotionSegment);
 
@@ -205,10 +205,10 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluatePositionAt(0.5)).toBe(1.75);
 
 
-    });   
+    });
 
     it ('should create a new cam segment with default values, then change the cam table to [0,1,2],[0,1,2], then change finalSlope to 2', function(){
-        var camSeg=CamSegment.createCamSegment(0, 0, 0);
+        var camSeg=CamSegment.Make(0, 0, 0);
 
         expect(camSeg instanceof CamSegment.CamMotionSegment);
 
@@ -246,7 +246,7 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camSeg.evaluateVelocityAt(1.5)).toBe(1);
 
 
-    });   
+    });
 
     it ('CamTable should not validate when master values are not sorted', function(){
 
@@ -263,7 +263,7 @@ describe('Unit: cam segment (logix element) testing', function() {
         expect(camTable.validate).toThrow();
 
 
-    });     
+    });
 
 
 

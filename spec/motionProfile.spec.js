@@ -1826,4 +1826,11 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(function () {profile.invertSegment(seg1.id)}).toThrowError('You cannot invert this segment.');
     });
 
+    it('should add a default cam segment to a profile, then undo it', function () {
+        var profile = motionProfileFactory.createMotionProfile("linear");
+        var camSeg1 = motionProfileFactory.createCamSegment(0, 0, 0, {friction: 0, load: 0, thrust:0});
+        profile.appendSegment(camSeg1);
+        profile.undo();
+    });
+
 });
