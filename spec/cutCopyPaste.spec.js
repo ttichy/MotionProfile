@@ -166,5 +166,38 @@ describe('Unit: cuty, copy, and paste testing', function() {
         }
         expect(profile.getAllBasicSegments().length).toBe(8);
 
-    })
+    });
+
+
+    it('should be able to copy a dwell segment', function () {
+        var profile = motionProfileFactory.createMotionProfile('rotary');
+
+        //segment.t0, segment.tf, segment.p0, segment.v0, segment.vf, segment.jPct, segment.mode, loads
+        var accelSeg = profile.appendSegment(
+            motionProfileFactory.createAccelSegment('time-velocity', {
+                t0: 0,
+                tf: 3.5,
+                p0: profile.initialPosition,
+                v0: profile.initialVelocity,
+                vf: 2.98,
+                jPct: 0.2,
+                mode: 'absolute'
+            })
+        );
+
+        var dwellSeg = profile.appendSegment(motionProfileFactory.createCruiseDwellSegment({
+            t0: 2,
+            tf: 2.25,
+            p0: 20,
+            v0: 20,
+            pf: 25,
+            permutation: 'distance',
+            mode: 'absolute'
+        }));
+
+        profile.copySegment(dwellSeg.id);
+
+
+    });
+
 });
