@@ -809,9 +809,6 @@ describe('Unit: motionProfileFactory testing', function() {
 
         profile.modifySegmentValues(sameSeg.id, {
             distance: 2.5
-        }, {
-            position: 0,
-            velocity: 0
         });
 
         // make sure expected final values are still valid

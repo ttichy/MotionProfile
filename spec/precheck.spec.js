@@ -414,4 +414,31 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluateVelocityAt(3.1)).toBeCloseTo(-4, 8);
         expect(profile.evaluatePositionAt(3.1)).toBeCloseTo(4.55, 8);
     });
+
+    it('should fail to change an index segemnt velocity limits', function () {
+        var profile = motionProfileFactory.createMotionProfile("linear");
+
+        var seg2 = profile.appendSegment(
+            motionProfileFactory.createIndexSegment({
+                t0: 0,
+                tf: 1,
+                p0: 0,
+                pf: 1,
+                v: 0,
+                velLimPos: null,
+                velLimNeg: null,
+                accJerk: 0.1,
+                decJerk: 0,
+                xSkew: null,
+                ySkew: null,
+                shape: 'triangle',
+                mode: 'absolute'
+            })
+        );
+
+        expect(function () {
+            profile.modifySegmentValues(seg2.id, {velLimPos: 0, velLimNeg: 0, accJerk: 0.38})
+        }).toThrowError('Modifying segment failed with Error: Positive velocity limit too low');
+
+    });
 });
