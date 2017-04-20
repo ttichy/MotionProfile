@@ -102,18 +102,43 @@ describe('Unit: indexSegmentFactory testing', function() {
         expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
         expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
 
-
         seg.invert();
 
-
         expect(seg.evaluatePositionAt(4)).toBeCloseTo(-2, 4);
-
 
         seg.invert();
 
         expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
         expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
 
+    });
+
+    it('should create an index segment and then change it from triangle to trapezoid and vice versa', function () {
+        // t0, tf, p0, pf, v, velLimPos, velLimNeg, accJerk, decJerk, xSkew, ySkew, shape, mode, loads
+        var seg = indexSegmentFactory.Make(0, 8, 0, 4, 0, null, null, 0.1, 0, null, null, 'trapezoid', 'incremental');
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
+        expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
+        expect(seg.evaluateVelocityAt(3)).toBeCloseTo(0.75, 4);
+        expect(seg.evaluateAccelerationAt(2.6039)).toBeCloseTo(0.1393668, 4);
+
+        seg.modifySegmentValues({shape: 'triangle'}, {time: 0, velocity: 0, position:0});
+
+        expect(seg.segmentData.shape).toBe('triangle');
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
+        expect(seg.evaluateVelocityAt(6.4)).toBeCloseTo(0.4, 4);
+        expect(seg.evaluateVelocityAt(3)).toBeCloseTo(0.763158, 4);
+        expect(seg.evaluateAccelerationAt(2.6039)).toBeCloseTo(0.263158, 4);
+
+        seg.modifySegmentValues({shape: 'trapezoid'}, {time: 0, velocity: 0, position:0});
+
+        expect(seg.segmentData.shape).toBe('trapezoid');
+
+        expect(seg.evaluatePositionAt(4)).toBeCloseTo(2, 4);
+        expect(seg.evaluateVelocityAt(6.437018)).toBeCloseTo(0.4395887, 4);
+        expect(seg.evaluateVelocityAt(3)).toBeCloseTo(0.75, 4);
+        expect(seg.evaluateAccelerationAt(2.6039)).toBeCloseTo(0.1393668, 4);
     });
 
 });
