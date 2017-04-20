@@ -1833,4 +1833,17 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.undo();
     });
 
+    it('should switch a profile from linear to rotary', function () {
+        var profile1 = motionProfileFactory.createMotionProfile('linear');
+        var profile2 = motionProfileFactory.switchProfileType(profile1, 'rotary');
+
+        expect(function () {
+            var profile3 = motionProfileFactory.switchProfileType(profile2,'rotar'); // rotar misspelled on purpose
+        }).toThrowError('Profile type must be either linear or rotary');
+
+        expect(function () {
+            var profile4 = motionProfileFactory.switchProfileType(profile2,'rotary'); // rotar misspelled on purpose
+        }).toThrowError('The profile is already of type rotary');
+    })
+
 });
