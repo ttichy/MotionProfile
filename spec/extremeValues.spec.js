@@ -86,7 +86,6 @@ describe('Unit: motionProfileFactory testing', function() {
             });
         });
 
-// [].concat.apply([], arrays);
         var extremes2 = [].concat.apply([], profile.getAllSegments().map(function (mSeg) {
             return mSeg.getAllExtremeValues();
         }));
