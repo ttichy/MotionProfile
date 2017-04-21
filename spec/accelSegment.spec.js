@@ -3,8 +3,6 @@ describe('Unit: accelSegmentFactory testing', function() {
     var accelSegmentFactory = require('../lib/segments/accelSegment');
     var MotionPoint  = require('../lib/profile/motionPoint').MotionPoint;
 
-
-
     it('should create an accel segment (t0=0,tf=2,p0=0,v0=0,vf=10,j=0.5) and correctly evalute position and velocities', function() {
 
         var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
@@ -62,7 +60,7 @@ describe('Unit: accelSegmentFactory testing', function() {
 
         var seg = accelSegmentFactory.MakeFromTimeVelocity(0, 2, 0, 0, 10, 0.5);
 
-        
+
 
         var newSeg = seg.modifyInitialValues(new MotionPoint(0, 0, 0, 0, 1));
 
@@ -446,7 +444,7 @@ describe('Unit: accelSegmentFactory testing', function() {
         var dupe = seg.duplicate();
 
         expect((dupe instanceof accelSegmentFactory.AccelMotionSegment)).toBe(true);
-        
+
     });
 
 

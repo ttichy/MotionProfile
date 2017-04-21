@@ -348,7 +348,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluatePositionAt(2.06)).toBeCloseTo(5.3, 4);
 
         expect(function () {
-            profile.modifySegmentValues(seg1.id, {acceleration: 0});
+            profile.modifySegmentValues(seg1.id, {speed: 0});
         }).toThrowError('Modifying segment failed with Error: Cannot modify cruise/dwell segment because of non-zero distance and zero velocity');
 
         expect(profile.evaluateAccelerationAt(1.8)).toBeCloseTo(1.5625, 4);

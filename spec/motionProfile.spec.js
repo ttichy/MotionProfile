@@ -573,7 +573,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(sameSeg).toBe(seg1);
 
         profile.modifySegmentValues(sameSeg.id, {
-            acceleration: 2.5
+            speed: 2.5
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -604,7 +604,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(sameSeg).toBe(seg1);
 
         profile.modifySegmentValues(seg1.id, {
-            acceleration: 2.5
+            speed: 2.5
         });
 
         var finalValues = sameSeg.getFinalValues();
@@ -635,7 +635,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(sameSeg).toBe(seg1);
 
         profile.modifySegmentValues(sameSeg.id,{
-            acceleration: 2.5,
+            speed: 2.5,
             duration: 1.2,
             jerkPercent: 0.25
         });
@@ -1192,13 +1192,13 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(seg1);
 
         var cruise = {};
-        cruise.t0=2;
-        cruise.tf=2.5;
-        cruise.p0=10;
-        cruise.v0=10;
-        cruise.pf=15;
-        cruise.permutation='time';
-        cruise.mode='incremental';
+        cruise.t0 = 2;
+        cruise.tf = 2.5;
+        cruise.p0 = 10;
+        cruise.v0 = 10;
+        cruise.pf = 15;
+        cruise.permutation = 'time';
+        cruise.mode = 'incremental';
 
 
         var seg2 = motionProfileFactory.createCruiseDwellSegment(cruise);
@@ -1209,7 +1209,7 @@ describe('Unit: motionProfileFactory testing', function() {
 
 
         profile.modifySegmentValues(seg1.id,{
-            acceleration: 2.5
+            speed: 2.5
         });
 
         expect(profile.evaluatePositionAt(2.5)).toBe(3.75);
@@ -1236,13 +1236,13 @@ describe('Unit: motionProfileFactory testing', function() {
         profile.appendSegment(seg1);
 
         var cruise = {};
-        cruise.t0=2;
-        cruise.tf=2.25;
-        cruise.p0=20;
-        cruise.v0=20;
-        cruise.pf=25;
-        cruise.permutation='distance';
-        cruise.mode='incremental';
+        cruise.t0 = 2;
+        cruise.tf = 2.25;
+        cruise.p0 = 20;
+        cruise.v0 = 20;
+        cruise.pf = 25;
+        cruise.permutation = 'distance';
+        cruise.mode = 'incremental';
 
 
         var seg2 = motionProfileFactory.createCruiseDwellSegment(cruise);
