@@ -211,12 +211,10 @@ describe('Unit: loadSegment testing', function() {
 		expect(loadSegs[0]).toBe(loadSeg1);
 
 		var changedSegment = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 2, 2);
-		profile.modifyLoadSegment(loadSeg1.id, changedSegment);
+		profile.modifyLoadSegment(loadSeg1.id, changedSegment.segmentData);
 
 		loadSegs = profile.getAllLoadSegments("FRICTION");
 		expect(loadSegs[0].evaluateLoadAt(2)).toBe(2);
-
-
 	});
 
 	it('should be able to undo/redo adding a load segment', function() {
@@ -235,8 +233,7 @@ describe('Unit: loadSegment testing', function() {
 		loadSegs = profile.getAllLoadSegments("FRICTION");
 
 		// should be empty
-		expect(loadSegs.length).toBe(1);
-		expect(loadSegs[0].segmentData.finalTime).toBe(Number.MAX_SAFE_INTEGER);
+		expect(loadSegs.length).toBe(0);
 
 		profile.redo();
 		loadSegs = profile.getAllLoadSegments("FRICTION");
@@ -273,29 +270,24 @@ describe('Unit: loadSegment testing', function() {
 
 
 	it('should be able to undo/redo modifying a load segment', function() {
-
 		var profile = motionProfileFactory.createMotionProfile("rotary");
-
 		var loadSeg1 = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 1, 1);
-
 		profile.addLoadSegment(loadSeg1);
+
 		var loadSegs = profile.getAllLoadSegments("FRICTION");
 
 		//should be able to get the same segment back
 		expect(loadSegs[0]).toBe(loadSeg1);
 
-
 		var changedSegment = motionProfileFactory.createLoadSegment("FRICTION", 0, 2, 2, 2);
-		profile.modifyLoadSegment(loadSeg1.id, changedSegment);
-		expect(profile.getAllLoadSegments("FRICTION")[0]).toBe(changedSegment);
+		profile.modifyLoadSegment(loadSeg1.id, changedSegment.segmentData);
+		expect(profile.getAllLoadSegments("FRICTION")[0].initialValue).toBe(changedSegment.initialValue);
 
 		profile.undo();
 		expect(profile.getAllLoadSegments("FRICTION")[0]).toBe(loadSeg1);
 
 		profile.redo();
-		expect(profile.getAllLoadSegments("FRICTION")[0]).toBe(changedSegment);
-
-
+		expect(profile.getAllLoadSegments("FRICTION")[0].finalValue).toBe(changedSegment.finalValue);
 	});
 
 

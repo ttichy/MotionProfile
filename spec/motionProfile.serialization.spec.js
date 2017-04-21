@@ -122,7 +122,7 @@ describe('Unit: profile serialization testing', function() {
 
         var profileObj = JSON.parse(json);
 
-        expect(profileObj.loadSegments.length).toBe(3);
+        expect(profileObj.loadSegments.length).toBe(1);
         expect(profileObj.segments.length).toBe(2);
 
         var newProfile = motionProfileFactory.deserialize(json);
@@ -133,7 +133,7 @@ describe('Unit: profile serialization testing', function() {
         expect(newProfile.getAllSegments()[0].evaluatePositionAt(1.1)).toBe(profile.getAllSegments()[0].evaluatePositionAt(1.1));
 
         var loadSegments = profile.getAllLoadSegments();
-        expect(loadSegments.length).toBe(3);
+        expect(loadSegments.length).toBe(1);
         expect(loadSegments[0].evaluateLoadAt(1)).toBe(loadSeg1.evaluateLoadAt(1));
 
     });
