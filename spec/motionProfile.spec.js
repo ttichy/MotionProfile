@@ -1820,7 +1820,9 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluateVelocityAt(2.5)).toBeCloseTo(-1600/60, 4);
         expect(profile.evaluateVelocityAt(3.5)).toBeCloseTo(1788.888888888/60, 4);
 
-        expect(function () {profile.invertSegment(seg1.id)}).toThrowError('You cannot invert this segment.');
+        expect(function () {
+            profile.invertSegment(seg1.id);
+        }).toThrowError('You cannot invert this segment.');
     });
 
     it('should add a default cam segment to a profile, then undo it', function () {
@@ -1841,6 +1843,6 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(function () {
             var profile4 = motionProfileFactory.switchProfileType(profile2,'rotary'); // rotar misspelled on purpose
         }).toThrowError('The profile is already of type rotary');
-    })
+    });
 
 });

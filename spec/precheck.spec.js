@@ -67,7 +67,7 @@ describe('Unit: motionProfileFactory testing', function() {
         expect(profile.evaluatePositionAt(2.2)).toBeCloseTo(5.2);
 
         expect(function () {
-            profile.setInitialConditions(0, 0, 0, 0, 0)
+            profile.setInitialConditions(0, 0, 0, 0, 0);
         }).toThrowError('Unable to modify initial conditions as it would invalidate a segment.');
 
         expect(profile.evaluateAccelerationAt(0.5)).toBeCloseTo(6);
@@ -437,7 +437,7 @@ describe('Unit: motionProfileFactory testing', function() {
         );
 
         expect(function () {
-            profile.modifySegmentValues(seg2.id, {velLimPos: 0, velLimNeg: 0, accJerk: 0.38})
+            profile.modifySegmentValues(seg2.id, {velLimPos: 0, velLimNeg: 0, accJerk: 0.38});
         }).toThrowError('Modifying segment failed with Error: Positive velocity limit too low');
 
     });
